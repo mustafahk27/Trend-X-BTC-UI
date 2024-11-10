@@ -1,0 +1,18 @@
+// This is just for reference of the model structure
+const bitcoinModel = {
+  nodes: {
+    Bitcoin: {
+      geometry: {
+        // Complex geometry data
+      }
+    }
+  },
+  materials: {
+    Bitcoin: {
+      // Material properties
+      metalness: 0.9,
+      roughness: 0.1,
+      color: '#F7931A'
+    }
+  }
+}
