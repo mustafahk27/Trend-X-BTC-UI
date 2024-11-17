@@ -20,6 +20,7 @@ import {
 import { useLoader } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
+import { useAuth } from "@clerk/nextjs";
 
 // Custom shader for the holographic effect
 const HolographicMaterial = shaderMaterial(
@@ -490,9 +491,11 @@ function EnhancedScene() {
 }
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth();
+  
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
-      {/* Simplified background gradient */}
+      {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />
       </div>
@@ -503,88 +506,39 @@ export default function LandingPage() {
           <EnhancedScene />
         </div>
         
-        {/* Content overlay - Simplified and better spaced */}
+        {/* Content overlay */}
         <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-          <div className="max-w-5xl mx-auto w-full text-center">
-            {/* Main heading */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="mb-24" // Increased spacing
-            >
-              <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6">
-                Predict Bitcoin's Future{" "}
-                <span className="text-[#F7931A]">
-                  with AI Precision
-                </span>
-              </h1>
-              
-              <p 
-                className="text-xl text-gray-400 max-w-2xl mx-auto"
-              >
-                Harness the power of machine learning for smarter crypto investments
-              </p>
-            </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center max-w-5xl mx-auto"
+          >
+            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6">
+              Predict Bitcoin's Future{" "}
+              <span className="text-[#F7931A]">
+                with AI Precision
+              </span>
+            </h1>
+            
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+              Harness the power of machine learning for smarter crypto investments
+            </p>
 
-            {/* Features - Simplified */}
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              {[
-                {
-                  title: "Real-time Analysis",
-                  description: "Get instant market insights"
-                },
-                {
-                  title: "Predictive Models",
-                  description: "Advanced price forecasting"
-                },
-                {
-                  title: "Smart Alerts",
-                  description: "Never miss market movements"
-                }
-              ].map((feature, index) => (
-                <div 
-                  key={index}
-                  className="p-4 rounded-lg bg-black/50 border border-white/5"
-                >
-                  <h3 className="text-lg font-medium text-white mb-1">{feature.title}</h3>
-                  <p className="text-sm text-gray-400">{feature.description}</p>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* CTA Button - Simplified */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-            >
-              <Link 
-                href="/dashboard" 
-                className="inline-flex items-center px-8 py-3 text-lg font-medium text-black bg-[#F7931A] rounded-lg hover:bg-[#F7931A]/90 transition-colors"
-              >
-                Start Predicting Now
-                <ArrowRight className="ml-2 w-5 h-5" />
+              <Link href={isSignedIn ? "/dashboard" : "/start"}>
+                <button className="bg-[#F7931A] text-black px-8 py-3 rounded-lg font-medium text-lg hover:bg-[#F7931A]/90 transition-all duration-300 transform hover:scale-105">
+                  {isSignedIn ? "Go to Dashboard" : "Start Predicting Now"}
+                </button>
               </Link>
             </motion.div>
-
-            {/* Footer text - Simplified */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.6 }}
-              className="absolute bottom-8 left-0 right-0 text-center text-sm text-gray-500"
-            >
-              Powered by advanced machine learning algorithms
-            </motion.p>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
-  )
+  );
 }

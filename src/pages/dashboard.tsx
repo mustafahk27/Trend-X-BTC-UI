@@ -1,307 +1,227 @@
 'use client'
 
-import { useState, useEffect } from "react"
-import { ArrowUpIcon, ArrowDownIcon, RefreshCwIcon, MessageCircle } from "lucide-react"
-import { Line, LineChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { useSpring, animated, config } from "react-spring"
-import { useInView } from "react-intersection-observer"
-import Link from "next/link"
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Clock, Home, MessageSquare, Wand2 } from "lucide-react";
+import Link from 'next/link';
+import { UserButton } from "@clerk/nextjs";
 
-const historicalData = [
-  { date: "2023-01-01", price: 16500 },
-  { date: "2023-02-01", price: 23000 },
-  { date: "2023-03-01", price: 28000 },
-  { date: "2023-04-01", price: 30000 },
-  { date: "2023-05-01", price: 27000 },
-  { date: "2023-06-01", price: 31000 },
-]
+// Sample data - replace with real data
+const data = [
+  { time: '00:00', price: 41000 },
+  { time: '04:00', price: 42500 },
+  { time: '08:00', price: 42000 },
+  { time: '12:00', price: 43500 },
+  { time: '16:00', price: 44000 },
+  { time: '20:00', price: 43800 },
+  { time: '24:00', price: 44200 },
+];
 
-const accuracyData = [
-  { date: "2023-01-01", accuracy: 95 },
-  { date: "2023-02-01", accuracy: 92 },
-  { date: "2023-03-01", accuracy: 97 },
-  { date: "2023-04-01", accuracy: 94 },
-  { date: "2023-05-01", accuracy: 96 },
-  { date: "2023-06-01", accuracy: 98 },
-]
-
-const AnimatedNumber = ({ n }) => {
-  const { number } = useSpring({
-    from: { number: 0 },
-    number: n,
-    delay: 200,
-    config: config.molasses,
-  })
-  return <animated.span>{number.to((n) => n.toFixed(0))}</animated.span>
-}
-
-const AnimatedCard = ({ children }) => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  })
-
-  const animProps = useSpring({
-    opacity: inView ? 1 : 0,
-    transform: inView ? "translateY(0px)" : "translateY(50px)",
-    config: config.wobbly,
-  })
-
-  return (
-    <animated.div ref={ref} style={animProps}>
-      {children}
-    </animated.div>
-  )
-}
+const stats = [
+  {
+    title: "Current Price",
+    value: "$44,231.54",
+    change: "+2.5%",
+    isPositive: true,
+    icon: DollarSign,
+  },
+  {
+    title: "24h Volume",
+    value: "$28.5B",
+    change: "-1.2%",
+    isPositive: false,
+    icon: Activity,
+  },
+  {
+    title: "Prediction Accuracy",
+    value: "89%",
+    change: "+0.8%",
+    isPositive: true,
+    icon: TrendingUp,
+  },
+  {
+    title: "Next Update",
+    value: "12:30 UTC",
+    change: "5 min",
+    isPositive: true,
+    icon: Clock,
+  },
+];
 
 export default function Dashboard() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [prediction, setPrediction] = useState(null)
-
-  const handlePredict = () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setPrediction({
-        price: 32500,
-        trend: "up",
-        confidence: [31800, 33200],
-      })
-      setIsLoading(false)
-    }, 2000)
-  }
-
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      <header className="sticky top-0 z-10 backdrop-blur-md bg-black bg-opacity-70 border-b border-gray-800">
-        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
-            Bitcoin Prediction Dashboard
-          </h1>
-          <Link href="/chatbot">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              Go to Chatbot
-            </Button>
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-black">
+      {/* Background Elements */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        <motion.h1
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.03 }}
+          transition={{ duration: 1 }}
+          className="text-[20vw] font-bold text-white whitespace-nowrap select-none"
+        >
+          TREND-X-BTC
+        </motion.h1>
+      </div>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <AnimatedCard>
-            <Card className="bg-gray-900 border border-gray-800 overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">Current Price</CardTitle>
-                <ArrowUpIcon className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">
-                  $<AnimatedNumber n={30123} />
-                </div>
-                <p className="text-xs text-gray-400">+2.5% from yesterday</p>
-              </CardContent>
-            </Card>
-          </AnimatedCard>
-          <AnimatedCard>
-            <Card className="bg-gray-900 border border-gray-800 overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">24h Volume</CardTitle>
-                <ArrowUpIcon className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">
-                  $<AnimatedNumber n={42.8} />B
-                </div>
-                <p className="text-xs text-gray-400">+5.1% from yesterday</p>
-              </CardContent>
-            </Card>
-          </AnimatedCard>
-          <AnimatedCard>
-            <Card className="bg-gray-900 border border-gray-800 overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-white">Market Cap</CardTitle>
-                <ArrowDownIcon className="h-4 w-4 text-red-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-white">
-                  $<AnimatedNumber n={586.3} />B
-                </div>
-                <p className="text-xs text-gray-400">-0.8% from yesterday</p>
-              </CardContent>
-            </Card>
-          </AnimatedCard>
-        </div>
+      {/* Navigation Buttons */}
+      <div className="fixed top-6 left-6 z-20 flex gap-4">
+        <Link href="/">
+          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
+            <Home className="h-4 w-4 mr-2" />
+            Home
+          </Button>
+        </Link>
+        <Link href="/chatbot">
+          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            AI Chat
+          </Button>
+        </Link>
+        <Link href="/prediction">
+          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
+            <Wand2 className="h-4 w-4 mr-2" />
+            Predict Latest
+          </Button>
+        </Link>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <AnimatedCard>
-            <Card className="bg-gray-900 border border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Prediction Input</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="symbol" className="text-white">Symbol</Label>
-                    <Select defaultValue="BTC">
-                      <SelectTrigger id="symbol" className="bg-gray-800 border-gray-700 text-white">
-                        <SelectValue placeholder="Select symbol" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="BTC">BTC</SelectItem>
-                        <SelectItem value="ETH">ETH</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="window-size" className="text-white">Window Size</Label>
-                    <Input id="window-size" type="number" defaultValue={30} className="bg-gray-800 border-gray-700 text-white" />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch id="generate-data" />
-                    <Label htmlFor="generate-data" className="text-white">Generate New Data</Label>
-                  </div>
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group"
-                    onClick={handlePredict} 
-                    disabled={isLoading}
-                  >
-                    <span className="relative z-10">
-                      {isLoading ? (
-                        <RefreshCwIcon className="mr-2 h-4 w-4 animate-spin inline" />
-                      ) : (
-                        "Predict"
-                      )}
-                    </span>
-                    <span className="absolute inset-0 h-full w-full scale-0 rounded-full bg-white opacity-25 transition-all duration-300 group-hover:scale-100" />
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </AnimatedCard>
+      {/* User Button (Logout) */}
+      <div className="fixed top-6 right-6 z-20">
+        <UserButton 
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: "w-10 h-10 rounded-full border-2 border-white/10 hover:border-[#F7931A]/50 transition-all",
+              userButtonPopover: "bg-black/90 border border-white/10 backdrop-blur-sm",
+              userButtonPopoverCard: "bg-transparent",
+              userButtonPopoverActions: "bg-transparent",
+              userButtonPopoverActionButton: "hover:bg-white/10",
+              userButtonPopoverActionButtonText: "text-white",
+              userButtonPopoverFooter: "hidden"
+            }
+          }}
+        />
+      </div>
 
-          {prediction && (
-            <AnimatedCard>
-              <Card className="bg-gray-900 border border-gray-800">
-                <CardHeader>
-                  <CardTitle className="text-white">Prediction Results</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <p className="text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
-                      ${prediction.price.toLocaleString()}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Confidence Interval: ${prediction.confidence[0].toLocaleString()} - $
-                      {prediction.confidence[1].toLocaleString()}
-                    </p>
-                    <div className="mt-4">
-                      {prediction.trend === "up" ? (
-                        <ArrowUpIcon className="w-8 h-8 text-green-500 mx-auto animate-bounce" />
-                      ) : (
-                        <ArrowDownIcon className="w-8 h-8 text-red-500 mx-auto animate-bounce" />
-                      )}
+      {/* Main Content */}
+      <main className="relative min-h-screen z-10 p-6 max-w-7xl mx-auto pt-24">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
+            >
+              <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-6">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">{stat.title}</p>
+                    <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
+                    <div className={`flex items-center mt-2 ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+                      {stat.isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                      <span className="text-sm ml-1">{stat.change}</span>
                     </div>
                   </div>
-                </CardContent>
+                  <div className="p-3 bg-[#F7931A]/10 rounded-lg">
+                    <stat.icon className="w-6 h-6 text-[#F7931A]" />
+                  </div>
+                </div>
               </Card>
-            </AnimatedCard>
-          )}
+            </motion.div>
+          ))}
         </div>
 
-        <AnimatedCard>
-          <Card className="bg-gray-900 border border-gray-800 mb-8 overflow-hidden">
-            <CardHeader>
-              <CardTitle className="text-white">Historical Bitcoin Prices</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  price: {
-                    label: "Price",
-                    color: "hsl(var(--chart-1))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={historicalData}>
-                    <XAxis dataKey="date" stroke="#888888" />
-                    <YAxis stroke="#888888" />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="price" stroke="#10B981" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </CardContent>
+        {/* Chart Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        >
+          {/* Main Chart */}
+          <Card className="lg:col-span-2 bg-black/50 backdrop-blur-sm border border-white/10 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Bitcoin Price Chart</h3>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data}>
+                  <XAxis 
+                    dataKey="time" 
+                    stroke="#666" 
+                    strokeWidth={0.5}
+                  />
+                  <YAxis 
+                    stroke="#666" 
+                    strokeWidth={0.5}
+                    domain={['auto', 'auto']}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'rgba(0,0,0,0.8)', 
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '8px'
+                    }}
+                    labelStyle={{ color: '#fff' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="price" 
+                    stroke="#F7931A" 
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </Card>
-        </AnimatedCard>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AnimatedCard>
-            <Card className="bg-gray-900 border border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Historical Accuracy</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer
-                  config={{
-                    accuracy: {
-                      label: "Accuracy",
-                      color: "hsl(var(--chart-2))",
-                    },
-                  }}
-                  className="h-[200px]"
+          {/* Predictions Panel */}
+          <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">AI Predictions</h3>
+            <div className="space-y-4">
+              {[
+                { timeframe: "1 Hour", prediction: "$44,580", confidence: 92 },
+                { timeframe: "4 Hours", prediction: "$44,850", confidence: 87 },
+                { timeframe: "24 Hours", prediction: "$45,200", confidence: 82 },
+              ].map((pred, index) => (
+                <div 
+                  key={pred.timeframe}
+                  className="p-4 rounded-lg bg-white/5 border border-white/10"
                 >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={accuracyData}>
-                      <XAxis dataKey="date" stroke="#888888" />
-                      <YAxis stroke="#888888" />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="accuracy" stroke="#3B82F6" strokeWidth={2} dot={false} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </ChartContainer>
-                <div className="mt-4 text-center">
-                  <p className="text-2xl font-semibold text-white">MAPE: <AnimatedNumber n={3.2} />%</p>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-400">{pred.timeframe}</span>
+                    <span className="text-[#F7931A] font-medium">{pred.prediction}</span>
+                  </div>
+                  <div className="w-full bg-black/50 rounded-full h-2">
+                    <div 
+                      className="bg-[#F7931A] h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${pred.confidence}%` }}
+                    />
+                  </div>
+                  <div className="text-right mt-1">
+                    <span className="text-xs text-gray-400">{pred.confidence}% confidence</span>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          </AnimatedCard>
-
-          <AnimatedCard>
-            <Card className="bg-gray-900 border border-gray-800">
-              <CardHeader>
-                <CardTitle className="text-white">Additional Indicators</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { name: "RSI", value: 62.5, color: "from-yellow-400 to-orange-500" },
-                    { name: "Order Flow", value: 1.2, color: "from-blue-400 to-indigo-500" },
-                    { name: "Fear & Greed Index", value: 75, color: "from-green-400 to-emerald-500" },
-                    { name: "Volume", value: 12.5, color: "from-purple-400 to-pink-500" },
-                  ].map((indicator) => (
-                    <div key={indicator.name} className="bg-gray-800 border border-gray-700 p-4 rounded-lg overflow-hidden relative group">
-                      <p className="text-sm text-gray-400">{indicator.name}</p>
-                      <p className={`text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r ${indicator.color}`}>
-                        <AnimatedNumber n={indicator.value} />
-                        {indicator.name === "Volume" && "B"}
-                      </p>
-                      <div className={`absolute inset-0 bg-gradient-to-r ${indicator.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </AnimatedCard>
-        </div>
+              ))}
+              
+              <Link href="/prediction">
+                <Button 
+                  className="w-full bg-[#F7931A] hover:bg-[#F7931A]/90 text-black font-medium mt-4"
+                >
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Generate New Prediction
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </motion.div>
       </main>
     </div>
-  )
+  );
 }

@@ -1,54 +1,39 @@
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import "@/styles/globals.css";
-import type { AppProps } from "next/app";
 import { Layout } from "@/components/Layout";
 import { useRouter } from "next/router";
-import { Url } from "next/dist/shared/lib/router/router";
+import type { AppPropsWithLayout } from 'next/app';
 
-function MyApp({ Component, pageProps }: AppProps) {
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
-  const isPublicRoute = ['/', '/auth/sign-in', '/auth/sign-up'].includes(router.pathname);
+  const isAuthPage = router.pathname.startsWith('/auth');
+  const isStartPage = router.pathname === '/start';
+  const isChatbotPage = router.pathname === '/chatbot';
+  const isDashboardPage = router.pathname === '/dashboard';
+  const isPredictionPage = router.pathname === '/prediction';
+
+  const shouldExcludeLayout = isAuthPage || isStartPage || isChatbotPage || isDashboardPage || isPredictionPage;
 
   return (
-    <ClerkProvider 
-      {...pageProps}
-      navigate={(to: Url) => router.push(to)}
-      afterSignInUrl="/home"
-      afterSignUpUrl="/home"
+    <ClerkProvider
+      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      appearance={{
+        baseTheme: undefined,
+        variables: { colorPrimary: '#F7931A' },
+        elements: {
+          formButtonPrimary: 
+            'bg-[#F7931A] hover:bg-[#F7931A]/90 text-black font-medium',
+          card: 'bg-black/50 backdrop-blur-sm border border-white/10',
+        }
+      }}
     >
-      <Layout>
-        {isPublicRoute ? (
+      {shouldExcludeLayout ? (
+        <Component {...pageProps} />
+      ) : (
+        <Layout>
           <Component {...pageProps} />
-        ) : (
-          <>
-            <SignedOut>
-              <div className="flex min-h-screen items-center justify-center bg-black">
-                <div className="text-center">
-                  <h1 className="mb-4 text-2xl font-bold text-white">
-                    Please sign in to continue
-                  </h1>
-                  <SignInButton mode="modal">
-                    <button className="rounded-full bg-white px-6 py-2 font-semibold text-black transition hover:bg-gray-200">
-                      Sign In
-                    </button>
-                  </SignInButton>
-                </div>
-              </div>
-            </SignedOut>
-            <SignedIn>
-              <Component {...pageProps} />
-            </SignedIn>
-          </>
-        )}
-      </Layout>
+        </Layout>
+      )}
     </ClerkProvider>
   );
 }
-
-export default MyApp;

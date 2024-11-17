@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const showHeader = router.pathname !== '/' && router.pathname !== '/auth/sign-in' && router.pathname !== '/auth/sign-up';
+  const showHeader = !router.pathname.startsWith('/auth/') && router.pathname !== '/';
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#111] text-black dark:text-white">
@@ -12,7 +12,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 h-14 flex items-center justify-between">
             <nav className="flex items-center space-x-6">
-              <Link href="/home" className="font-bold text-xl">
+              <Link href="/dashboard" className="font-bold text-xl">
                 TradingAI
               </Link>
               <SignedIn>
@@ -22,9 +22,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   </Link>
                   <Link href="/chatbot" className="text-sm font-medium hover:text-primary">
                     Chatbot
-                  </Link>
-                  <Link href="/prediction" className="text-sm font-medium hover:text-primary">
-                    Prediction
                   </Link>
                 </div>
               </SignedIn>
