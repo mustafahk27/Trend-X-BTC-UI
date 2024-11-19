@@ -1,18 +1,19 @@
 "use client"
 
 import { useState, useRef, useEffect } from 'react';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw, Send, ArrowLeft, Home, BarChart2 } from "lucide-react";
+import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { Sparkles } from "@react-three/drei";
 import FloatingBitcoins from "@/components/FloatingBitcoins";
 import { Wand2 } from "lucide-react";
+import { tavily } from "@tavily/core";
 
 type Message = {
   content: string;
@@ -20,8 +21,23 @@ type Message = {
   timestamp: Date;
 };
 
+type Citation = {
+  url: string;
+  title: string;
+  snippet: string;
+};
+
+type EnhancedMessage = Message & {
+  citations?: Citation[];
+};
+
+// Initialize Tavily client outside the component
+const tvly = tavily({ 
+  apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
+});
+
 export default function ChatbotPage() {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<EnhancedMessage[]>([
     {
       content: "Hello! I'm your AI assistant for Bitcoin predictions. How can I help you today?",
       isUser: false,
@@ -31,7 +47,11 @@ export default function ChatbotPage() {
   const [input, setInput] = useState('');
   const [context, setContext] = useState('General Bitcoin Analysis');
   const [isTyping, setIsTyping] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showCitations, setShowCitations] = useState<{[key: number]: boolean}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,16 +74,91 @@ export default function ChatbotPage() {
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
+    try {
+      // Check if API key is available
+      if (!process.env.NEXT_PUBLIC_TAVILY_API_KEY) {
+        throw new Error('Tavily API key is not configured');
+      }
+
+      // Perform Tavily search with error logging
+      const searchResponse = await tvly.search(input, {
+        searchDepth: "basic",
+      });
+      
+      console.log('Search response:', searchResponse); // Add this for debugging
+
+      // Create AI response using the search results
       const aiMessage = {
-        content: "Based on current market trends and technical analysis, Bitcoin shows strong support at the current level. However, always remember that cryptocurrency markets are highly volatile.",
+        content: searchResponse.results[0]?.content || "I couldn't find relevant information for your query.",
         isUser: false,
         timestamp: new Date(),
       };
+
       setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Tavily API error:', error); // Add this for debugging
+      const errorMessage = {
+        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}`,
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 2000);
+    }
+  };
+
+  const handleWebSearch = async () => {
+    if (!input.trim()) return;
+    setIsSearching(true);
+
+    const userMessage = {
+      content: input,
+      isUser: true,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+
+    try {
+      if (!process.env.NEXT_PUBLIC_TAVILY_API_KEY) {
+        throw new Error('Tavily API key is not configured');
+      }
+
+      const searchResponse = await tvly.search(input, {
+        searchDepth: "advanced",
+        includeRawContent: true,
+      });
+
+      const citations = searchResponse.results.map(result => ({
+        url: result.url,
+        title: result.title,
+        snippet: result.snippet,
+      }));
+
+      const aiMessage = {
+        content: searchResponse.results
+          .slice(0, 3)
+          .map(r => r.content)
+          .join('\n\n'),
+        isUser: false,
+        timestamp: new Date(),
+        citations,
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Web search error:', error);
+      const errorMessage = {
+        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}`,
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const clearContext = () => {
@@ -74,6 +169,32 @@ export default function ChatbotPage() {
       timestamp: new Date(),
     }]);
   };
+
+  const toggleWebSearch = () => {
+    setWebSearchEnabled(prev => !prev);
+    setShowTooltip(true);
+    setTimeout(() => setShowTooltip(false), 2000); // Hide tooltip after 2 seconds
+  };
+
+  const handleSubmit = () => {
+    if (webSearchEnabled) {
+      handleWebSearch();
+    } else {
+      handleSend();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        toggleWebSearch();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   return (
     <div className="min-h-screen bg-black">
@@ -174,33 +295,68 @@ export default function ChatbotPage() {
                 key={index}
                 initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ 
-                  duration: 0.5,
-                  type: "spring",
-                  bounce: 0.3
-                }}
+                transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
                 className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-4`}
               >
-                <div className={`flex items-start gap-3 max-w-[80%] ${message.isUser ? "flex-row-reverse" : ""}`}>
-                  <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ type: "spring", bounce: 0.5 }}
-                  >
+                <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%]`}>
+                  <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
                     <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10"}>
                       <AvatarImage src={message.isUser ? "/user-avatar.png" : "/ai-avatar.png"} />
                       <AvatarFallback>{message.isUser ? "U" : "AI"}</AvatarFallback>
                     </Avatar>
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className={`p-3 rounded-xl ${
-                      message.isUser
-                        ? "bg-[#F7931A] text-black"
-                        : "bg-white/10 text-white"
-                    }`}
-                  >
-                    {message.content}
-                  </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      className={`p-3 rounded-xl ${
+                        message.isUser
+                          ? "bg-[#F7931A] text-black"
+                          : "bg-white/10 text-white"
+                      }`}
+                    >
+                      {message.content}
+                    </motion.div>
+                  </div>
+                  
+                  {!message.isUser && message.citations && message.citations.length > 0 && (
+                    <div className="mt-2 ml-12">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowCitations(prev => ({
+                          ...prev,
+                          [index]: !prev[index]
+                        }))}
+                        className="text-[#F7931A] hover:text-[#F7931A]/80"
+                      >
+                        {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
+                      </Button>
+                      
+                      {showCitations[index] && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-2 space-y-2"
+                        >
+                          {message.citations.map((citation, citIndex) => (
+                            <div
+                              key={citIndex}
+                              className="p-2 rounded bg-white/5 border border-white/10"
+                            >
+                              <a
+                                href={citation.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[#F7931A] hover:underline text-sm font-medium"
+                              >
+                                {citation.title}
+                              </a>
+                              <p className="text-sm text-gray-400 mt-1">{citation.snippet}</p>
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -220,6 +376,23 @@ export default function ChatbotPage() {
                 </div>
               </motion.div>
             )}
+            {isSearching && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center gap-2 text-gray-400"
+              >
+                <Avatar className="bg-white/10 w-8 h-8">
+                  <AvatarFallback>AI</AvatarFallback>
+                </Avatar>
+                <div className="p-3 rounded-xl bg-white/10">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    Searching the web...
+                  </div>
+                </div>
+              </motion.div>
+            )}
             <div ref={messagesEndRef} />
           </ScrollArea>
 
@@ -230,30 +403,86 @@ export default function ChatbotPage() {
             transition={{ duration: 0.5 }}
             className="p-4 border-t border-white/10 bg-black/30"
           >
-            <motion.div 
-              className="flex gap-2"
-              whileHover={{ scale: 1.01 }}
-              transition={{ type: "spring", bounce: 0.5 }}
-            >
+            <motion.div className="flex gap-2 relative">
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask about Bitcoin predictions..."
-                className="bg-white/10 border-white/10 text-white placeholder:text-gray-500"
+                onKeyPress={(e) => e.key === 'Enter' && (webSearchEnabled ? handleWebSearch() : handleSend())}
+                placeholder={webSearchEnabled ? "Search the web about Bitcoin..." : "Ask about Bitcoin predictions..."}
+                className={`bg-white/10 border-white/10 text-white placeholder:text-gray-500 ${
+                  webSearchEnabled ? "border-[#F7931A]/50" : ""
+                }`}
               />
-              <Button
-                onClick={handleSend}
-                className="bg-[#F7931A] hover:bg-[#F7931A]/90 text-black"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+              <motion.div className="flex gap-2">
+                <div className="relative">
+                  <Button
+                    onClick={toggleWebSearch}
+                    className={`relative transition-all duration-300 ${
+                      webSearchEnabled
+                        ? "bg-[#F7931A] text-black hover:bg-[#F7931A]/90"
+                        : "bg-[#F7931A]/20 hover:bg-[#F7931A]/30 text-[#F7931A]"
+                    }`}
+                    disabled={isSearching}
+                  >
+                    <BarChart2 className={`h-4 w-4 mr-2 ${
+                      webSearchEnabled ? "animate-pulse" : ""
+                    }`} />
+                    Web Search
+                    {webSearchEnabled && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
+                      >
+                        <Check className="h-3 w-3 text-white" />
+                      </motion.div>
+                    )}
+                  </Button>
+                  
+                  {/* Tooltip */}
+                  <AnimatePresence>
+                    {showTooltip && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-sm py-2 px-3 rounded-lg whitespace-nowrap"
+                      >
+                        {webSearchEnabled ? "Web Search enabled" : "Web Search disabled"}
+                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black/90" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <Button
+                  onClick={webSearchEnabled ? handleWebSearch : handleSend}
+                  className="bg-[#F7931A] hover:bg-[#F7931A]/90 text-black"
+                  disabled={isSearching}
+                >
+                  {webSearchEnabled ? (
+                    <Search className="h-4 w-4" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                </Button>
+              </motion.div>
             </motion.div>
           </motion.div>
         </Card>
       </main>
+
+      {/* Active Search Mode Indicator */}
+      {webSearchEnabled && (
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute -bottom-6 left-0 text-sm text-[#F7931A]/80 flex items-center gap-2"
+        >
+          <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse" />
+          Web Search Mode Active
+        </motion.div>
+      )}
     </div>
   );
 }

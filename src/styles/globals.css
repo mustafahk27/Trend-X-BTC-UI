@@ -90,3 +90,19 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px #F7931A40;
+  }
+  50% {
+    box-shadow: 0 0 20px #F7931A40;
+  }
+  100% {
+    box-shadow: 0 0 5px #F7931A40;
+  }
+}
+
+.web-search-active {
+  animation: glow 2s infinite;
+}
