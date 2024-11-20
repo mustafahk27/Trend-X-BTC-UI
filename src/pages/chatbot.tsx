@@ -320,13 +320,13 @@ export default function ChatbotPage() {
                 </Button>
               </Link>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearContext} 
-              className="text-white hover:text-gray-200 transition-transform transform hover:scale-105"
+            <Button
+              onClick={clearContext}
+              variant="ghost"
+              className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />Clear Context
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Clear Chat
             </Button>
           </motion.div>
 
@@ -519,7 +519,7 @@ export default function ChatbotPage() {
         <motion.div
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="absolute -bottom-6 left-0 text-sm text-[#F7931A]/80 flex items-center gap-2"
+          className="fixed bottom-6 left-6 z-50 text-sm text-[#F7931A]/80 flex items-center gap-2 bg-black/50 backdrop-blur-sm py-2 px-4 rounded-full border border-[#F7931A]/20"
         >
           <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse" />
           Web Search Mode Active
