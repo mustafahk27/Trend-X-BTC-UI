@@ -17,6 +17,7 @@ import { tavily } from "@tavily/core";
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls } from "@react-three/drei";
+import { useUser } from "@clerk/nextjs";
 
 type Message = {
   content: string;
@@ -73,6 +74,7 @@ export default function ChatbotPage() {
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const { user } = useUser();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -342,9 +344,31 @@ export default function ChatbotPage() {
               >
                 <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%]`}>
                   <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
-                    <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10"}>
-                      <AvatarImage src={message.isUser ? "/user-avatar.png" : "/ai-avatar.png"} />
-                      <AvatarFallback>{message.isUser ? "U" : "AI"}</AvatarFallback>
+                    <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
+                      {message.isUser ? (
+                        <>
+                          <AvatarImage 
+                            src={user?.imageUrl || "/user-avatar.png"} 
+                            alt={user?.fullName || "User"}
+                          />
+                          <AvatarFallback>{user?.firstName?.[0] || "U"}</AvatarFallback>
+                        </>
+                      ) : (
+                        <>
+                          <AvatarImage 
+                            src="/ai-avatar.png" 
+                            alt="AI Assistant" 
+                            className="object-cover w-full h-full"
+                          />
+                          <AvatarFallback>
+                            <img 
+                              src="/ai-avatar.png" 
+                              alt="AI" 
+                              className="w-full h-full object-cover" 
+                            />
+                          </AvatarFallback>
+                        </>
+                      )}
                     </Avatar>
                     <motion.div
                       whileHover={{ scale: 1.02 }}
@@ -408,8 +432,19 @@ export default function ChatbotPage() {
                 animate={{ opacity: 1 }}
                 className="flex items-center gap-2 text-gray-400"
               >
-                <Avatar className="bg-white/10 w-8 h-8">
-                  <AvatarFallback>AI</AvatarFallback>
+                <Avatar className="bg-white/10 w-8 h-8 overflow-hidden">
+                  <AvatarImage 
+                    src="/ai-avatar.png" 
+                    alt="AI Assistant" 
+                    className="object-cover w-full h-full"
+                  />
+                  <AvatarFallback>
+                    <img 
+                      src="/ai-avatar.png" 
+                      alt="AI" 
+                      className="w-full h-full object-cover" 
+                    />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex gap-1">
                   <span className="animate-bounce">●</span>
@@ -424,8 +459,19 @@ export default function ChatbotPage() {
                 animate={{ opacity: 1 }}
                 className="flex items-center gap-2 text-gray-400"
               >
-                <Avatar className="bg-white/10 w-8 h-8">
-                  <AvatarFallback>AI</AvatarFallback>
+                <Avatar className="bg-white/10 w-8 h-8 overflow-hidden">
+                  <AvatarImage 
+                    src="/ai-avatar.png" 
+                    alt="AI Assistant" 
+                    className="object-cover w-full h-full"
+                  />
+                  <AvatarFallback>
+                    <img 
+                      src="/ai-avatar.png" 
+                      alt="AI" 
+                      className="w-full h-full object-cover" 
+                    />
+                  </AvatarFallback>
                 </Avatar>
                 <div className="p-3 rounded-xl bg-white/10">
                   <div className="flex items-center gap-2">
