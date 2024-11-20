@@ -2,7 +2,7 @@
 
 import { useState, Suspense, useRef, useMemo, useEffect } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 import { Canvas, useFrame, extend as extendThree, type Object3DNode } from '@react-three/fiber'
 import { OrbitControls, Environment, Float, Text, Points } from '@react-three/drei'
@@ -21,6 +21,7 @@ import { useLoader } from '@react-three/fiber'
 import { TextureLoader } from 'three'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
 import { useAuth } from "@clerk/nextjs";
+import WelcomeLoader from './WelcomeLoader';
 
 // Custom shader for the holographic effect
 const HolographicMaterial = shaderMaterial(
@@ -492,9 +493,22 @@ function EnhancedScene() {
 
 export default function LandingPage() {
   const { isSignedIn } = useAuth();
-  
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Increase loading time to 10 seconds
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
+      <AnimatePresence>
+        {isLoading && <WelcomeLoader />}
+      </AnimatePresence>
+
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />

@@ -14,6 +14,9 @@ import { Sparkles } from "@react-three/drei";
 import FloatingBitcoins from "@/components/FloatingBitcoins";
 import { Wand2 } from "lucide-react";
 import { tavily } from "@tavily/core";
+import { Canvas } from "@react-three/fiber";
+import { Suspense } from "react";
+import { OrbitControls } from "@react-three/drei";
 
 type Message = {
   content: string;
@@ -35,6 +38,23 @@ type EnhancedMessage = Message & {
 const tvly = tavily({ 
   apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
 });
+
+function LoadingBitcoin() {
+  return (
+    <mesh>
+      <cylinderGeometry args={[2, 2, 0.2, 32]} />
+      <meshPhysicalMaterial
+        color="#F7931A"
+        metalness={0.9}
+        roughness={0.1}
+        clearcoat={1}
+        clearcoatRoughness={0.1}
+        emissive="#F7931A"
+        emissiveIntensity={0.2}
+      />
+    </mesh>
+  );
+}
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<EnhancedMessage[]>([
