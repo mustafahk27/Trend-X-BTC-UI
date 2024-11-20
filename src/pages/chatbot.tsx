@@ -72,6 +72,7 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -216,6 +217,27 @@ export default function ChatbotPage() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
 
+  const handleCitationClick = (index: number) => {
+    setShowCitations(prev => {
+      const newState = {
+        ...prev,
+        [index]: !prev[index]
+      };
+      
+      // If showing citations, scroll to them after they render
+      if (newState[index]) {
+        setTimeout(() => {
+          citationRefs.current[index]?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }, 100);
+      }
+      
+      return newState;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-black">
       {/* Background Elements */}
@@ -341,10 +363,7 @@ export default function ChatbotPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setShowCitations(prev => ({
-                          ...prev,
-                          [index]: !prev[index]
-                        }))}
+                        onClick={() => handleCitationClick(index)}
                         className="text-[#F7931A] hover:text-[#F7931A]/80"
                       >
                         {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
@@ -356,6 +375,7 @@ export default function ChatbotPage() {
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
                           className="mt-2 space-y-2"
+                          ref={el => citationRefs.current[index] = el}
                         >
                           {message.citations.map((citation, citIndex) => (
                             <div
@@ -370,7 +390,9 @@ export default function ChatbotPage() {
                               >
                                 {citation.title}
                               </a>
-                              <p className="text-sm text-gray-400 mt-1">{citation.snippet}</p>
+                              <p className="text-sm text-gray-400 mt-1">
+                                {citation.snippet}
+                              </p>
                             </div>
                           ))}
                         </motion.div>
