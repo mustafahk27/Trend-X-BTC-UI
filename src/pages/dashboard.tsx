@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Clock, Home, MessageSquare, Wand2 } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Clock, Home, MessageSquare, Wand2, Database } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 
@@ -35,18 +35,18 @@ const stats = [
     icon: Activity,
   },
   {
-    title: "Prediction Accuracy",
-    value: "89%",
-    change: "+0.8%",
+    title: "Number of Trades",
+    value: "847,392",
+    change: "+5.3%",
     isPositive: true,
     icon: TrendingUp,
   },
   {
-    title: "Next Update",
-    value: "12:30 UTC",
-    change: "5 min",
+    title: "Average Block Size",
+    value: "1.37 MB",
+    change: "+0.2 MB",
     isPositive: true,
-    icon: Clock,
+    icon: Database,
   },
 ];
 
@@ -183,29 +183,68 @@ export default function Dashboard() {
 
           {/* Predictions Panel */}
           <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">AI Predictions</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Market Analysis</h3>
             <div className="space-y-4">
+              {/* Fear & Greed Index */}
+              <div className="p-4 rounded-lg bg-white/5 border border-white/10 mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-400">Fear & Greed Index</span>
+                  <span className="text-[#4CD964] font-medium">83</span>
+                </div>
+                <div className="w-full h-3 bg-black/50 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full" 
+                    style={{
+                      width: '83%',
+                      background: 'linear-gradient(90deg, #FF3B30 0%, #FF9500 50%, #4CD964 100%)'
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-xs text-gray-400">Extreme Fear</span>
+                  <span className="text-xs text-gray-400">Extreme Greed</span>
+                </div>
+                <div className="text-right mt-1">
+                  <span className="text-xs text-[#4CD964]">Extreme Greed</span>
+                </div>
+              </div>
+
+              {/* Market Metrics */}
               {[
-                { timeframe: "1 Hour", prediction: "$44,580", confidence: 92 },
-                { timeframe: "4 Hours", prediction: "$44,850", confidence: 87 },
-                { timeframe: "24 Hours", prediction: "$45,200", confidence: 82 },
-              ].map((pred, index) => (
+                { 
+                  metric: "Net Order Flow", 
+                  value: "+$247.8M", 
+                  trend: 92,
+                  isPositive: true 
+                },
+                { 
+                  metric: "Active Addresses", 
+                  value: "1.24M", 
+                  trend: 87,
+                  isPositive: true 
+                }
+              ].map((metric, index) => (
                 <div 
-                  key={pred.timeframe}
+                  key={metric.metric}
                   className="p-4 rounded-lg bg-white/5 border border-white/10"
                 >
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-400">{pred.timeframe}</span>
-                    <span className="text-[#F7931A] font-medium">{pred.prediction}</span>
+                    <span className="text-gray-400">{metric.metric}</span>
+                    <span className={`font-medium ${metric.isPositive ? 'text-[#4CD964]' : 'text-[#FF3B30]'}`}>
+                      {metric.value}
+                    </span>
                   </div>
                   <div className="w-full bg-black/50 rounded-full h-2">
                     <div 
-                      className="bg-[#F7931A] h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${pred.confidence}%` }}
+                      className={`h-2 rounded-full transition-all duration-500 ${
+                        metric.isPositive ? 'bg-[#4CD964]' : 'bg-[#FF3B30]'
+                      }`}
+                      style={{ width: `${metric.trend}%` }}
                     />
                   </div>
                   <div className="text-right mt-1">
-                    <span className="text-xs text-gray-400">{pred.confidence}% confidence</span>
+                    <span className="text-xs text-gray-400">
+                      {metric.trend}% of daily average
+                    </span>
                   </div>
                 </div>
               ))}
@@ -215,7 +254,7 @@ export default function Dashboard() {
                   className="w-full bg-[#F7931A] hover:bg-[#F7931A]/90 text-black font-medium mt-4"
                 >
                   <Wand2 className="h-4 w-4 mr-2" />
-                  Generate New Prediction
+                  Generate New AI Suggestions
                 </Button>
               </Link>
             </div>
