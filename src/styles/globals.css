@@ -112,7 +112,7 @@ body {
   background: #F7931A;
   border: none;
   border-radius: 30px;
-  padding: 16px 20px;
+  padding: 8px 20px;
   box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -167,4 +167,57 @@ body {
 /* Remove the expanded glow effect */
 .search-input-container.expanded .search-input {
   background: #000000;
+}
+
+/* Web search button styling */
+.web-search-button {
+  height: 48px;
+  padding: 0 16px;
+  background: #000000;
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.web-search-button:hover {
+  background: rgba(247, 147, 26, 0.9);
+  color: black;
+}
+
+/* Active state for web search button */
+.web-search-button.active {
+  background: #F7931A;
+  color: black;
+  border: none;
+  box-shadow: 0 0 15px rgba(247, 147, 26, 0.3);
+}
+
+/* Send button styling - made more round */
+.send-button {
+  height: 48px;
+  width: 48px;
+  background: #F7931A;
+  border-radius: 9999px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+}
+
+.send-button:hover {
+  background: rgba(247, 147, 26, 0.9);
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  background: rgba(247, 147, 26, 0.3);
+  color: rgba(0, 0, 0, 0.5);
+  cursor: not-allowed;
+  transform: none;
 }
