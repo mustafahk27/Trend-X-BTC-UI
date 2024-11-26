@@ -106,3 +106,116 @@ body {
 .web-search-active {
   animation: glow 2s infinite;
 }
+
+/* Search Container */
+.search-input-container {
+  position: relative;
+  width: 300px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+}
+
+.search-input-container.expanded {
+  width: min(800px, 90vw);
+}
+
+/* Search Input */
+.search-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input:focus {
+  border-color: rgba(247, 147, 26, 0.5);
+  box-shadow: 0 0 0 2px rgba(247, 147, 26, 0.2);
+}
+
+/* Button Container */
+.button-container {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Web Search Button */
+.web-search-button {
+  height: 32px;
+  padding: 0 16px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  color: white;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.web-search-button.active {
+  background: #F7931A;
+  color: black;
+}
+
+.web-search-button:hover {
+  background: rgba(247, 147, 26, 0.2);
+}
+
+.web-search-button.active:hover {
+  background: rgba(247, 147, 26, 0.9);
+}
+
+/* Send Button */
+.send-button {
+  height: 32px;
+  width: 32px;
+  background: #F7931A;
+  border-radius: 9999px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.send-button:hover {
+  background: rgba(247, 147, 26, 0.9);
+}
+
+.send-button:disabled {
+  background: rgba(247, 147, 26, 0.5);
+  cursor: not-allowed;
+}
+
+/* Button Text */
+.button-text {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.search-input-container.expanded .button-text {
+  opacity: 1;
+  width: auto;
+  margin-left: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .search-input-container {
+    width: 200px;
+  }
+  
+  .search-input-container.expanded {
+    width: 100%;
+  }
+}

@@ -489,73 +489,46 @@ export default function ChatbotPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="p-4 border-t border-white/10 bg-black/30"
+            className="fixed bottom-6 left-0 right-0 px-4"
           >
-            <motion.div className="flex gap-2 relative">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (webSearchEnabled ? handleWebSearch() : handleSend())}
-                placeholder={webSearchEnabled ? "Search the web about Bitcoin..." : "Ask about Bitcoin predictions..."}
-                className={`bg-white/10 border-white/10 text-white placeholder:text-gray-500 ${
-                  webSearchEnabled ? "border-[#F7931A]/50" : ""
-                }`}
-              />
-              <motion.div className="flex gap-2">
-                <div className="relative">
+            <div className="max-w-4xl mx-auto flex justify-center">
+              <motion.div 
+                initial={{ y: 20 }}
+                animate={{ y: 0 }}
+                className={`search-input-container ${input ? 'expanded' : ''}`}
+                onFocus={(e) => e.currentTarget.classList.add('expanded')}
+                onBlur={(e) => !input && e.currentTarget.classList.remove('expanded')}
+              >
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                  placeholder="Ask AI..."
+                  className="search-input"
+                  aria-label="Chat input"
+                />
+                
+                <div className="button-container">
                   <Button
                     onClick={toggleWebSearch}
-                    className={`relative transition-all duration-300 ${
-                      webSearchEnabled
-                        ? "bg-[#F7931A] text-black hover:bg-[#F7931A]/90"
-                        : "bg-[#F7931A]/20 hover:bg-[#F7931A]/30 text-[#F7931A]"
-                    }`}
-                    disabled={isSearching}
+                    className={`web-search-button ${webSearchEnabled ? 'active' : ''}`}
+                    aria-label="Toggle web search"
                   >
-                    <BarChart2 className={`h-4 w-4 mr-2 ${
-                      webSearchEnabled ? "animate-pulse" : ""
-                    }`} />
-                    Web Search
-                    {webSearchEnabled && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center"
-                      >
-                        <Check className="h-3 w-3 text-white" />
-                      </motion.div>
-                    )}
+                    <Search className="h-4 w-4 mr-2" />
+                    <span className="button-text">Web</span>
                   </Button>
                   
-                  {/* Tooltip */}
-                  <AnimatePresence>
-                    {showTooltip && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-black/90 text-white text-sm py-2 px-3 rounded-lg whitespace-nowrap"
-                      >
-                        {webSearchEnabled ? "Web Search enabled" : "Web Search disabled"}
-                        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-black/90" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <Button
-                  onClick={webSearchEnabled ? handleWebSearch : handleSend}
-                  className="bg-[#F7931A] hover:bg-[#F7931A]/90 text-black"
-                  disabled={isSearching}
-                >
-                  {webSearchEnabled ? (
-                    <Search className="h-4 w-4" />
-                  ) : (
+                  <Button
+                    onClick={handleSubmit}
+                    className="send-button"
+                    disabled={!input.trim()}
+                    aria-label="Send message"
+                  >
                     <Send className="h-4 w-4" />
-                  )}
-                </Button>
+                  </Button>
+                </div>
               </motion.div>
-            </motion.div>
+            </div>
           </motion.div>
         </Card>
       </main>
