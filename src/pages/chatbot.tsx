@@ -489,16 +489,23 @@ export default function ChatbotPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="fixed bottom-6 left-0 right-0 px-4"
+            className="fixed bottom-6 left-0 right-0 px-4 z-50"
           >
             <div className="max-w-4xl mx-auto flex justify-center">
-              <motion.div 
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
-                className={`search-input-container ${input ? 'expanded' : ''}`}
+              <div 
+                className={`search-container-wrapper ${input ? 'expanded' : ''}`}
                 onFocus={(e) => e.currentTarget.classList.add('expanded')}
                 onBlur={(e) => !input && e.currentTarget.classList.remove('expanded')}
               >
+                <Button
+                  onClick={toggleWebSearch}
+                  className={`web-search-button ${webSearchEnabled ? 'active' : ''}`}
+                  aria-label="Toggle web search"
+                >
+                  <Search className="h-4 w-4" />
+                  <span className="button-text">Web</span>
+                </Button>
+
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -507,27 +514,16 @@ export default function ChatbotPage() {
                   className="search-input"
                   aria-label="Chat input"
                 />
-                
-                <div className="button-container">
-                  <Button
-                    onClick={toggleWebSearch}
-                    className={`web-search-button ${webSearchEnabled ? 'active' : ''}`}
-                    aria-label="Toggle web search"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    <span className="button-text">Web</span>
-                  </Button>
-                  
-                  <Button
-                    onClick={handleSubmit}
-                    className="send-button"
-                    disabled={!input.trim()}
-                    aria-label="Send message"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </motion.div>
+
+                <Button
+                  onClick={handleSubmit}
+                  className="send-button"
+                  disabled={!input.trim()}
+                  aria-label="Send message"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </motion.div>
         </Card>
