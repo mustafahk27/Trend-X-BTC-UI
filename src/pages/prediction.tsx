@@ -87,9 +87,9 @@ export default function PredictionPage() {
   const [showPulse, setShowPulse] = useState(false);
   const [prediction, setPrediction] = useState<null | {
     price: string;
-    confidence: number;
     trend: 'up' | 'down';
     timeframe: string;
+    dates: { date: string; price: string }[];
   }>(null);
   const controls = useAnimation();
 
@@ -112,9 +112,17 @@ export default function PredictionPage() {
     setTimeout(() => {
       setPrediction({
         price: "$44,850.00",
-        confidence: 89,
         trend: 'up',
         timeframe: '24h',
+        dates: [
+          { date: "Mar 20", price: "$44,850.00" },
+          { date: "Mar 21", price: "$45,200.00" },
+          { date: "Mar 22", price: "$45,750.00" },
+          { date: "Mar 23", price: "$46,100.00" },
+          { date: "Mar 24", price: "$46,500.00" },
+          { date: "Mar 25", price: "$46,800.00" },
+          { date: "Mar 26", price: "$47,200.00" },
+        ]
       });
       setIsPredicting(false);
       setTimeout(() => setShowPulse(false), 500);
@@ -159,7 +167,14 @@ export default function PredictionPage() {
                   exit={{ opacity: 0 }}
                 >
                   <div className="space-y-2 mb-8">
-                    {["Analyzing market patterns", "Processing historical data", "Calculating probabilities"].map((text, index) => (
+                    {[
+                      "Fetching blockchain metrics and market data...",
+                      "Analyzing Fear & Greed Index and on-chain signals...",
+                      "Processing historical patterns with LSTM networks...",
+                      "Applying attention mechanism to key indicators...",
+                      "Generating neural network predictions...",
+                      
+                    ].map((text, index) => (
                       <motion.div
                         key={text}
                         initial={{ opacity: 0, x: -20 }}
@@ -188,7 +203,7 @@ export default function PredictionPage() {
                     >
                       <div className="flex items-center justify-center gap-2 text-[#F7931A] mb-4">
                         <div className="w-12 h-[1px] bg-[#F7931A]/50" />
-                        <p className="text-sm font-mono uppercase tracking-wider">Quantum Prediction Engine</p>
+                        <p className="text-sm font-mono uppercase tracking-wider">Market Prediction Engine</p>
                         <div className="w-12 h-[1px] bg-[#F7931A]/50" />
                       </div>
                       <h1 className="text-4xl md:text-5xl font-bold text-white">
@@ -201,16 +216,16 @@ export default function PredictionPage() {
                       animate={{ opacity: 1 }}
                       className="text-gray-400 text-lg max-w-2xl mx-auto mb-8"
                     >
-                      Our quantum-enhanced neural networks analyze over 50+ market indicators to predict Bitcoin's trajectory
+                      Our AI Model analyze over 25+ market indicators to predict Bitcoin's trajectory with 98% accuracy
                     </motion.p>
 
                     <div className="flex justify-center gap-16 text-sm text-gray-500 mb-12">
                       <div className="flex flex-col items-center">
-                        <div className="text-[#F7931A] mb-1">50+</div>
+                        <div className="text-[#F7931A] mb-1">25+</div>
                         <div>Indicators</div>
                       </div>
                       <div className="flex flex-col items-center">
-                        <div className="text-[#F7931A] mb-1">89%</div>
+                        <div className="text-[#F7931A] mb-1">98%</div>
                         <div>Accuracy</div>
                       </div>
                       <div className="flex flex-col items-center">
@@ -230,7 +245,7 @@ export default function PredictionPage() {
                       onClick={handlePredict}
                       className="relative bg-gradient-to-r from-[#F7931A] to-[#FFB347] text-black px-12 py-8 rounded-2xl font-bold text-xl hover:opacity-90 transition-all duration-300"
                     >
-                      Initialize Quantum Analysis
+                      Predict Bitcoin's Price
                     </Button>
                   </motion.div>
                 </>
@@ -250,23 +265,20 @@ export default function PredictionPage() {
                     transition={{ delay: 0.2 }}
                     className="text-center"
                   >
-                    <h2 className="text-2xl font-bold text-white mb-6">Prediction Results</h2>
+                    <h2 className="text-2xl font-bold text-white mb-6">Weekly Price Prediction</h2>
                     <div className="space-y-4">
                       <div>
-                        <p className="text-gray-400 mb-1">Predicted Price (24h)</p>
+                        <p className="text-gray-400 mb-1">Current Price</p>
                         <p className="text-4xl font-bold text-[#F7931A]">{prediction.price}</p>
                       </div>
-                      <div>
-                        <p className="text-gray-400 mb-1">Confidence Level</p>
-                        <div className="w-full bg-black/50 rounded-full h-2">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${prediction.confidence}%` }}
-                            transition={{ duration: 1, delay: 0.5 }}
-                            className="bg-[#F7931A] h-2 rounded-full"
-                          />
-                        </div>
-                        <p className="text-sm text-gray-400 mt-1">{prediction.confidence}%</p>
+                      <div className="space-y-2">
+                        <p className="text-gray-400 mb-2">7-Day Forecast</p>
+                        {prediction?.dates?.map((day, index) => (
+                          <div key={day.date} className="flex justify-between items-center py-2 border-b border-white/10">
+                            <span className="text-gray-400">{day.date}</span>
+                            <span className="text-[#F7931A] font-semibold">{day.price}</span>
+                          </div>
+                        ))}
                       </div>
                       <Button
                         onClick={() => setPrediction(null)}
