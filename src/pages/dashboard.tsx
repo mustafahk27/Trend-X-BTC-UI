@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Clock, Home, MessageSquare, Wand2, Database } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Clock, Home, MessageSquare, Wand2, Database, ArrowLeft } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
+import { NavButton } from "@/components/ui/nav-button";
 
 // Sample data - replace with real data
 const data = [
@@ -70,24 +71,9 @@ export default function Dashboard() {
 
       {/* Navigation Buttons */}
       <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <Link href="/">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <Home className="h-4 w-4 mr-2" />
-            Home
-          </Button>
-        </Link>
-        <Link href="/chatbot">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            AI Chat
-          </Button>
-        </Link>
-        <Link href="/prediction">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <Wand2 className="h-4 w-4 mr-2" />
-            Predict Latest
-          </Button>
-        </Link>
+        <NavButton href="/" icon={Home} label="Home" />
+        <NavButton href="/chatbot" icon={MessageSquare} label="AI Chat" />
+        <NavButton href="/prediction" icon={Wand2} label="Predict Latest" />
       </div>
 
       {/* User Button (Logout) */}

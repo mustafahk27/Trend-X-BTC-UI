@@ -221,3 +221,19 @@ body {
   cursor: not-allowed;
   transform: none;
 }
+
+@keyframes buttonGlow {
+  0% {
+    box-shadow: 0 0 5px rgba(247, 147, 26, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(247, 147, 26, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(247, 147, 26, 0.2);
+  }
+}
+
+.nav-button-hover {
+  animation: buttonGlow 2s infinite;
+}

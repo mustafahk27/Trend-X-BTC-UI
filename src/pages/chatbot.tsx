@@ -18,6 +18,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls } from "@react-three/drei";
 import { useUser } from "@clerk/nextjs";
+import { NavButton } from "@/components/ui/nav-button";
 
 type Message = {
   content: string;
@@ -260,24 +261,9 @@ export default function ChatbotPage() {
 
       {/* Navigation Buttons */}
       <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <Link href="/dashboard">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </Link>
-        <Link href="/">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <Home className="h-4 w-4 mr-2" />
-            Home
-          </Button>
-        </Link>
-        <Link href="/dashboard">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <BarChart2 className="h-4 w-4 mr-2" />
-            Dashboard
-          </Button>
-        </Link>
+        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
+        <NavButton href="/" icon={Home} label="Home" />
+        <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" />
       </div>
 
       {/* User Button (Logout) */}

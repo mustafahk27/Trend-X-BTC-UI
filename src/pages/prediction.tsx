@@ -13,6 +13,7 @@ import { UserButton } from "@clerk/nextjs";
 import { EnhancedBitcoinModel } from "@/components/EnhancedBitcoinModel";
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
 import { Vector2 } from 'three';
+import { NavButton } from "@/components/ui/nav-button";
 
 function PredictionScene({ isPredicting }: { isPredicting: boolean }) {
   return (
@@ -132,12 +133,7 @@ export default function PredictionPage() {
 
       {/* Navigation */}
       <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <Link href="/dashboard">
-          <Button variant="ghost" className="bg-black/50 backdrop-blur-sm border border-white/10 text-white hover:bg-white/10">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </Link>
+        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
       </div>
 
       {/* User Button */}
