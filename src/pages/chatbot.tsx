@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search } from "lucide-react";
+import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search, ChevronDown } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { Sparkles } from "@react-three/drei";
@@ -35,6 +35,30 @@ type Citation = {
 type EnhancedMessage = Message & {
   citations?: Citation[];
 };
+
+type LLMModel = {
+  id: string;
+  name: string;
+  description: string;
+};
+
+const availableModels: LLMModel[] = [
+  { id: 'mixtral-8x7b-32k', name: 'Mixtral 8x7B-32K', description: 'Large context window model with strong general capabilities' },
+  { id: 'gemma-2-9b', name: 'Gemma 2 9B', description: 'Efficient mid-sized language model' },
+  { id: 'gemma-7b', name: 'Gemma 7B', description: 'Lightweight yet capable language model' },
+  { id: 'llama-3-70b-versatile', name: 'Llama 3.1 70B Versatile', description: 'Large-scale model for diverse tasks' },
+  { id: 'llama-3-8b-instant', name: 'Llama 3.1 8B Instant', description: 'Fast, efficient model for quick responses' },
+  { id: 'llama-3-1b-preview', name: 'Llama 3.2 1B Preview', description: 'Compact preview model' },
+  { id: 'llama-3-3b-preview', name: 'Llama 3.2 3B Preview', description: 'Enhanced preview model' },
+  { id: 'llama-3-11b-vision', name: 'Llama 3.2 11B Vision', description: 'Vision-language model for image analysis' },
+  { id: 'llama-3-90b-vision', name: 'Llama 3.2 90B Vision', description: 'Advanced vision-language model' },
+  { id: 'llama-3-70b-tool', name: 'Llama 3 Groq 70B Tool', description: 'Tool-optimized large model' },
+  { id: 'llama-3-8b-tool', name: 'Llama 3 Groq 8B Tool', description: 'Efficient tool-optimized model' },
+  { id: 'whisper-large-v3', name: 'Distil Whisper Large V3', description: 'Advanced speech recognition model' },
+  { id: 'chat-api', name: 'Regular Chat API', description: 'Standard chat interface' },
+  { id: 'image-chat-api', name: 'Image Chat API', description: 'Image analysis and discussion' },
+  { id: 'audio-api', name: 'Audio Transcription API', description: 'Speech-to-text conversion' },
+];
 
 // Initialize Tavily client outside the component
 const tvly = tavily({ 
@@ -76,6 +100,8 @@ export default function ChatbotPage() {
   const [showTooltip, setShowTooltip] = useState(false);
   const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const { user } = useUser();
+  const [selectedModel, setSelectedModel] = useState<LLMModel>(availableModels[0]);
+  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -99,30 +125,84 @@ export default function ChatbotPage() {
     setIsTyping(true);
 
     try {
-      // Check if API key is available
-      if (!process.env.NEXT_PUBLIC_TAVILY_API_KEY) {
-        throw new Error('Tavily API key is not configured');
+      if (webSearchEnabled) {
+        await handleWebSearch();
+        return;
       }
 
-      // Perform Tavily search with error logging
-      const searchResponse = await tvly.search(input, {
-        searchDepth: "basic",
-      });
-      
-      console.log('Search response:', searchResponse); // Add this for debugging
+      let response;
+      let data;
 
-      // Create AI response using the search results
+      // Handle different model types
+      if (selectedModel.id.includes('vision')) {
+        response = await fetch('/api/chat-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'text', text: input }
+              ]
+            }],
+            modelId: selectedModel.id
+          })
+        });
+      } 
+      else if (selectedModel.id === 'whisper-large-v3') {
+        // Handle audio transcription
+        const formData = new FormData();
+        formData.append('audio', input);
+        formData.append('modelId', selectedModel.id);
+        
+        response = await fetch('/api/audio', {
+          method: 'POST',
+          body: formData
+        });
+      }
+      else {
+        // Handle regular chat models
+        response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{
+              role: 'user',
+              content: input
+            }],
+            modelId: selectedModel.id
+          })
+        });
+      }
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error('Failed to get response from API');
+      }
+
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        throw new Error('Invalid response format from server');
+      }
+
+      if (!data || (!data.content && !data.text)) {
+        throw new Error('Invalid response format from API');
+      }
+
       const aiMessage = {
-        content: searchResponse.results[0]?.content || "I couldn't find relevant information for your query.",
+        content: data.content || data.text,
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Tavily API error:', error); // Add this for debugging
+      console.error('Error details:', error);
       const errorMessage = {
-        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}`,
+        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try again.`,
         isUser: false,
         timestamp: new Date(),
       };
@@ -133,18 +213,7 @@ export default function ChatbotPage() {
   };
 
   const handleWebSearch = async () => {
-    if (!input.trim()) return;
     setIsSearching(true);
-
-    const userMessage = {
-      content: input,
-      isUser: true,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-
     try {
       if (!process.env.NEXT_PUBLIC_TAVILY_API_KEY) {
         throw new Error('Tavily API key is not configured');
@@ -201,11 +270,7 @@ export default function ChatbotPage() {
   };
 
   const handleSubmit = () => {
-    if (webSearchEnabled) {
-      handleWebSearch();
-    } else {
-      handleSend();
-    }
+    handleSend();
   };
 
   useEffect(() => {
@@ -264,6 +329,46 @@ export default function ChatbotPage() {
         <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
         <NavButton href="/" icon={Home} label="Home" />
         <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" />
+      </div>
+
+      {/* Model Selector */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-20">
+        <div className="relative">
+          <Button
+            onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+            className="bg-black/50 backdrop-blur-sm border border-white/10 hover:bg-white/5 text-white flex items-center gap-2 px-4 py-2 rounded-lg"
+          >
+            <span className="text-[#F7931A]">{selectedModel.name}</span>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+
+          <AnimatePresence>
+            {isModelMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full mt-2 w-64 bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg overflow-hidden"
+              >
+                {availableModels.map((model) => (
+                  <button
+                    key={model.id}
+                    onClick={() => {
+                      setSelectedModel(model);
+                      setIsModelMenuOpen(false);
+                    }}
+                    className={`w-full px-4 py-3 text-left hover:bg-white/5 transition-colors ${
+                      selectedModel.id === model.id ? 'bg-[#F7931A]/10 text-[#F7931A]' : 'text-white'
+                    }`}
+                  >
+                    <div className="font-medium">{model.name}</div>
+                    <div className="text-sm text-gray-400">{model.description}</div>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* User Button (Logout) */}
