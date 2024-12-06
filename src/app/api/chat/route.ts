@@ -1,31 +1,37 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.GROQ_API_KEY;
+const geminiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
   throw new Error('GROQ_API_KEY is not defined in environment variables');
+}
+
+if (!geminiKey) {
+  throw new Error('GEMINI_API_KEY is not defined in environment variables');
 }
 
 const groq = new Groq({
   apiKey,
 });
 
-// Map our frontend model IDs to Groq's actual model IDs
+const genAI = new GoogleGenerativeAI(geminiKey);
+
 const MODEL_MAP: { [key: string]: string } = {
   'mixtral-8x7b-32k': 'mixtral-8x7b-32768',
   'gemma-2-9b': 'gemma2-9b-it',
   'gemma-7b': 'gemma-7b-it',
+  'gemini-pro': 'gemini-1.5-pro',
+  'gemini-flash': 'gemini-1.5-flash',
   'llama-3-70b-versatile': 'llama-3.1-70b-versatile',
   'llama-3-8b-instant': 'llama-3.1-8b-instant',
   'llama-3-1b-preview': 'llama-3.2-1b-preview',
   'llama-3-3b-preview': 'llama-3.2-3b-preview',
-  'llama-3-11b-vision': 'llama-3.2-11b-vision-preview',
-  'llama-3-90b-vision': 'llama-3.2-90b-vision-preview',
   'llama-3-70b-tool': 'llama3-groq-70b-8192-tool-use-preview',
   'llama-3-8b-tool': 'llama3-groq-8b-8192-tool-use-preview',
   'chat-api': 'mixtral-8x7b-32768',
-  'image-chat-api': 'llama-3.2-11b-vision-preview',
   'audio-api': 'whisper-large-v3'
 };
 
@@ -48,8 +54,28 @@ export async function POST(request: Request) {
       );
     }
 
-    const actualModelId = MODEL_MAP[modelId] || 'mixtral-8x7b-32768';
-    console.log('Using Groq model:', actualModelId);
+    const actualModelId = MODEL_MAP[modelId];
+    console.log('Using model:', actualModelId);
+
+    if (modelId === 'gemini-pro' || modelId === 'gemini-flash') {
+      const model = genAI.getGenerativeModel({ model: actualModelId });
+      const chat = model.startChat();
+      
+      for (const message of messages) {
+        if (message.role === 'user') {
+          await chat.sendMessage(message.content);
+        }
+      }
+      
+      const lastMessage = messages[messages.length - 1];
+      const result = await chat.sendMessage(lastMessage.content);
+      const response = await result.response.text();
+      
+      return NextResponse.json({
+        content: response,
+        role: 'assistant'
+      });
+    }
 
     const completion = await groq.chat.completions.create({
       messages: messages.map(msg => ({
@@ -62,7 +88,7 @@ export async function POST(request: Request) {
     });
 
     if (!completion.choices?.[0]?.message) {
-      throw new Error('No response from Groq API');
+      throw new Error('No response from API');
     }
 
     return NextResponse.json({

@@ -42,22 +42,38 @@ type LLMModel = {
   description: string;
 };
 
-const availableModels: LLMModel[] = [
-  { id: 'mixtral-8x7b-32k', name: 'Mixtral 8x7B-32K', description: 'Large context window model with strong general capabilities' },
-  { id: 'gemma-2-9b', name: 'Gemma 2 9B', description: 'Efficient mid-sized language model' },
-  { id: 'gemma-7b', name: 'Gemma 7B', description: 'Lightweight yet capable language model' },
-  { id: 'llama-3-70b-versatile', name: 'Llama 3.1 70B Versatile', description: 'Large-scale model for diverse tasks' },
-  { id: 'llama-3-8b-instant', name: 'Llama 3.1 8B Instant', description: 'Fast, efficient model for quick responses' },
-  { id: 'llama-3-1b-preview', name: 'Llama 3.2 1B Preview', description: 'Compact preview model' },
-  { id: 'llama-3-3b-preview', name: 'Llama 3.2 3B Preview', description: 'Enhanced preview model' },
-  { id: 'llama-3-11b-vision', name: 'Llama 3.2 11B Vision', description: 'Vision-language model for image analysis' },
-  { id: 'llama-3-90b-vision', name: 'Llama 3.2 90B Vision', description: 'Advanced vision-language model' },
-  { id: 'llama-3-70b-tool', name: 'Llama 3 Groq 70B Tool', description: 'Tool-optimized large model' },
-  { id: 'llama-3-8b-tool', name: 'Llama 3 Groq 8B Tool', description: 'Efficient tool-optimized model' },
-  { id: 'whisper-large-v3', name: 'Distil Whisper Large V3', description: 'Advanced speech recognition model' },
-  { id: 'chat-api', name: 'Regular Chat API', description: 'Standard chat interface' },
-  { id: 'image-chat-api', name: 'Image Chat API', description: 'Image analysis and discussion' },
-  { id: 'audio-api', name: 'Audio Transcription API', description: 'Speech-to-text conversion' },
+type ModelCategory = {
+  title: string;
+  models: LLMModel[];
+};
+
+const modelCategories: ModelCategory[] = [
+  {
+    title: "Google LLMs",
+    models: [
+      { id: 'gemini-pro', name: 'Gemini 1.5 Pro', description: 'Advanced Google AI model with strong reasoning' },
+      { id: 'gemini-flash', name: 'Gemini 1.5 Flash', description: 'Fast and efficient Google AI model' },
+      { id: 'gemma-2-9b', name: 'Gemma 2 9B', description: 'Efficient mid-sized language model' },
+      { id: 'gemma-7b', name: 'Gemma 7B', description: 'Lightweight yet capable language model' },
+    ]
+  },
+  {
+    title: "Mistral LLMs",
+    models: [
+      { id: 'mixtral-8x7b-32k', name: 'Mixtral 8x7B-32K', description: 'Large context window model with strong general capabilities' },
+    ]
+  },
+  {
+    title: "Meta LLMs",
+    models: [
+      { id: 'llama-3-70b-versatile', name: 'Llama 3.1 70B Versatile', description: 'Large-scale model for diverse tasks' },
+      { id: 'llama-3-8b-instant', name: 'Llama 3.1 8B Instant', description: 'Fast, efficient model for quick responses' },
+      { id: 'llama-3-1b-preview', name: 'Llama 3.2 1B Preview', description: 'Compact preview model' },
+      { id: 'llama-3-3b-preview', name: 'Llama 3.2 3B Preview', description: 'Enhanced preview model' },
+      { id: 'llama-3-70b-tool', name: 'Llama 3 Groq 70B Tool', description: 'Tool-optimized large model' },
+      { id: 'llama-3-8b-tool', name: 'Llama 3 Groq 8B Tool', description: 'Efficient tool-optimized model' },
+    ]
+  }
 ];
 
 // Initialize Tavily client outside the component
@@ -82,6 +98,93 @@ function LoadingBitcoin() {
   );
 }
 
+const ModelSelector = ({ 
+  selectedModel, 
+  onModelSelect, 
+  isOpen, 
+  onToggle 
+}: {
+  selectedModel: LLMModel;
+  onModelSelect: (model: LLMModel) => void;
+  isOpen: boolean;
+  onToggle: () => void;
+}) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        if (isOpen) onToggle();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onToggle]);
+
+  return (
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-20" ref={dropdownRef}>
+      <div className="relative">
+        <Button
+          onClick={onToggle}
+          className="bg-black/50 backdrop-blur-sm border border-white/10 hover:bg-white/5 text-white flex items-center gap-2 px-4 py-2 rounded-lg"
+        >
+          <span className="text-[#F7931A]">{selectedModel.name}</span>
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-full mt-2 w-96 bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg overflow-hidden max-h-[80vh] overflow-y-auto scrollbar-hide"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
+              {modelCategories.map((category) => (
+                <div 
+                  key={category.title}
+                  className="border-b border-white/10 last:border-b-0"
+                >
+                  <div className="px-4 py-2 bg-white/5 sticky top-0 backdrop-blur-sm">
+                    <h3 className="text-sm font-semibold text-[#F7931A] uppercase tracking-wider">
+                      {category.title}
+                    </h3>
+                  </div>
+
+                  <div className="divide-y divide-white/5">
+                    {category.models.map((model) => (
+                      <button
+                        key={model.id}
+                        onClick={() => {
+                          onModelSelect(model);
+                          onToggle();
+                        }}
+                        className={`w-full px-4 py-3 text-left transition-colors
+                          ${selectedModel.id === model.id 
+                            ? 'bg-[#F7931A]/10 text-[#F7931A]' 
+                            : 'text-white hover:bg-white/5'
+                          }`}
+                      >
+                        <div className="font-medium">{model.name}</div>
+                        <div className="text-sm text-gray-400 mt-0.5">{model.description}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<EnhancedMessage[]>([
     {
@@ -100,7 +203,7 @@ export default function ChatbotPage() {
   const [showTooltip, setShowTooltip] = useState(false);
   const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const { user } = useUser();
-  const [selectedModel, setSelectedModel] = useState<LLMModel>(availableModels[0]);
+  const [selectedModel, setSelectedModel] = useState<LLMModel>(modelCategories[0].models[0]);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 
   const scrollToBottom = () => {
@@ -332,44 +435,12 @@ export default function ChatbotPage() {
       </div>
 
       {/* Model Selector */}
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-20">
-        <div className="relative">
-          <Button
-            onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-            className="bg-black/50 backdrop-blur-sm border border-white/10 hover:bg-white/5 text-white flex items-center gap-2 px-4 py-2 rounded-lg"
-          >
-            <span className="text-[#F7931A]">{selectedModel.name}</span>
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-
-          <AnimatePresence>
-            {isModelMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full mt-2 w-64 bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg overflow-hidden"
-              >
-                {availableModels.map((model) => (
-                  <button
-                    key={model.id}
-                    onClick={() => {
-                      setSelectedModel(model);
-                      setIsModelMenuOpen(false);
-                    }}
-                    className={`w-full px-4 py-3 text-left hover:bg-white/5 transition-colors ${
-                      selectedModel.id === model.id ? 'bg-[#F7931A]/10 text-[#F7931A]' : 'text-white'
-                    }`}
-                  >
-                    <div className="font-medium">{model.name}</div>
-                    <div className="text-sm text-gray-400">{model.description}</div>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+      <ModelSelector
+        selectedModel={selectedModel}
+        onModelSelect={setSelectedModel}
+        isOpen={isModelMenuOpen}
+        onToggle={() => setIsModelMenuOpen(!isModelMenuOpen)}
+      />
 
       {/* User Button (Logout) */}
       <div className="fixed top-6 right-6 z-20">
