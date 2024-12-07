@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
@@ -202,9 +203,9 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
       initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-4`}
+      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-2`}
     >
-      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%]`}>
+      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%] last:mb-0`}>
         <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
           <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
             {message.isUser ? (
@@ -232,7 +233,6 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
               </>
             )}
           </Avatar>
-          
           <motion.div
             whileHover={{ scale: 1.02 }}
             className={`p-4 rounded-xl ${
@@ -249,9 +249,11 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
                 h2: ({ children }) => (
                   <h2 className={markdownStyles.subheading}>{children}</h2>
                 ),
-                p: ({ children }) => (
-                  <p className={markdownStyles.paragraph}>{children}</p>
-                ),
+                p: ({ children }) => {
+                  const content = Array.isArray(children) ? children.join('').replace(/\n+$/, '') : String(children).replace(/\n+$/, '');
+                  if (!content) return null;
+                  return <p className={markdownStyles.paragraph} style={{ marginBottom: 0 }}>{content}</p>;
+                },
                 ul: ({ children }) => (
                   <ul className={markdownStyles.list}>{children}</ul>
                 ),
@@ -262,17 +264,14 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
                   <strong className="font-bold text-[#F7931A]">{children}</strong>
                 ),
                 code: ({ children }) => (
-                  <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">
-                    {children}
-                  </code>
+                  <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">{children}</code>
                 ),
               }}
             >
-              {message.content}
+              {message.content.replace(/\n+$/, '')}
             </ReactMarkdown>
           </motion.div>
         </div>
-        
         {!message.isUser && message.citations && message.citations.length > 0 && (
           <div className="mt-2 ml-12">
             <Button
@@ -283,7 +282,6 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
             >
               {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
             </Button>
-            
             {showCitations[index] && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -305,9 +303,7 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
                     >
                       {citation.title}
                     </a>
-                    <p className="text-sm text-gray-400 mt-1">
-                      {citation.snippet}
-                    </p>
+                    <p className="text-sm text-gray-400 mt-1">{citation.snippet}</p>
                   </div>
                 ))}
               </motion.div>
@@ -316,7 +312,7 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
         )}
       </div>
     </motion.div>
- );
+  );
 }
 
 export default function ChatbotPage() {
