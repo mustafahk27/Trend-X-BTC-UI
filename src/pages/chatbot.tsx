@@ -233,45 +233,51 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
               </>
             )}
           </Avatar>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className={`p-4 rounded-xl ${
-              message.isUser
-                ? "bg-[#F7931A] text-black"
-                : "bg-white/10 text-white"
-            }`}
-          >
-            <ReactMarkdown
-              components={{
-                h1: ({ children }) => (
-                  <h1 className={markdownStyles.heading}>{children}</h1>
-                ),
-                h2: ({ children }) => (
-                  <h2 className={markdownStyles.subheading}>{children}</h2>
-                ),
-                p: ({ children }) => {
-                  const content = Array.isArray(children) ? children.join('').replace(/\n+$/, '') : String(children).replace(/\n+$/, '');
-                  if (!content) return null;
-                  return <p className={markdownStyles.paragraph} style={{ marginBottom: 0 }}>{content}</p>;
-                },
-                ul: ({ children }) => (
-                  <ul className={markdownStyles.list}>{children}</ul>
-                ),
-                li: ({ children }) => (
-                  <li className={markdownStyles.listItem}>• {children}</li>
-                ),
-                strong: ({ children }) => (
-                  <strong className="font-bold text-[#F7931A]">{children}</strong>
-                ),
-                code: ({ children }) => (
-                  <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">{children}</code>
-                ),
-              }}
+          
+          {/* Conditional rendering based on message type */}
+          {message.isUser ? (
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              className="p-4 rounded-xl bg-[#F7931A] text-black"
             >
-              {message.content.replace(/\n+$/, '')}
-            </ReactMarkdown>
-          </motion.div>
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </motion.div>
+          ) : (
+            <div className="text-white">
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => (
+                    <h1 className={markdownStyles.heading}>{children}</h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className={markdownStyles.subheading}>{children}</h2>
+                  ),
+                  p: ({ children }) => {
+                    const content = Array.isArray(children) ? children.join('').replace(/\n+$/, '') : String(children).replace(/\n+$/, '');
+                    if (!content) return null;
+                    return <p className={markdownStyles.paragraph} style={{ marginBottom: 0 }}>{content}</p>;
+                  },
+                  ul: ({ children }) => (
+                    <ul className={markdownStyles.list}>{children}</ul>
+                  ),
+                  li: ({ children }) => (
+                    <li className={markdownStyles.listItem}>• {children}</li>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-bold text-[#F7931A]">{children}</strong>
+                  ),
+                  code: ({ children }) => (
+                    <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">{children}</code>
+                  ),
+                }}
+              >
+                {message.content.replace(/\n+$/, '')}
+              </ReactMarkdown>
+            </div>
+          )}
         </div>
+        
+        {/* Citations section remains unchanged */}
         {!message.isUser && message.citations && message.citations.length > 0 && (
           <div className="mt-2 ml-12">
             <Button
