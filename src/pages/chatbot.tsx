@@ -234,7 +234,6 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
             )}
           </Avatar>
           
-          {/* Conditional rendering based on message type */}
           {message.isUser ? (
             <motion.div
               whileHover={{ scale: 1.02 }}
@@ -247,37 +246,54 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
               <ReactMarkdown
                 components={{
                   h1: ({ children }) => (
-                    <h1 className={markdownStyles.heading}>{children}</h1>
+                    <h1 className="text-2xl font-bold mt-4 mb-2 text-[#F7931A]">{children}</h1>
                   ),
                   h2: ({ children }) => (
-                    <h2 className={markdownStyles.subheading}>{children}</h2>
+                    <h2 className="text-xl font-semibold mt-3 mb-2 text-[#F7931A]/80">{children}</h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="text-lg font-semibold mt-2 mb-1 text-[#F7931A]/60">{children}</h3>
                   ),
                   p: ({ children }) => {
-                    const content = Array.isArray(children) ? children.join('').replace(/\n+$/, '') : String(children).replace(/\n+$/, '');
-                    if (!content) return null;
-                    return <p className={markdownStyles.paragraph} style={{ marginBottom: 0 }}>{content}</p>;
+                    if (!children) return null;
+                    return <p className="mb-4 text-gray-200">{children}</p>;
                   },
                   ul: ({ children }) => (
-                    <ul className={markdownStyles.list}>{children}</ul>
+                    <ul className="mb-4 ml-4 space-y-2">{children}</ul>
                   ),
-                  li: ({ children }) => (
-                    <li className={markdownStyles.listItem}>• {children}</li>
-                  ),
+                  li: ({ children }) => {
+                    if (!children) return null;
+                    return (
+                      <li className="flex items-start">
+                        <span className="mr-2 text-[#F7931A]">•</span>
+                        <span className="text-gray-200">{children}</span>
+                      </li>
+                    );
+                  },
                   strong: ({ children }) => (
                     <strong className="font-bold text-[#F7931A]">{children}</strong>
                   ),
-                  code: ({ children }) => (
-                    <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">{children}</code>
+                  em: ({ children }) => (
+                    <em className="italic text-gray-300">{children}</em>
+                  ),
+                  code: ({ inline, children }) => (
+                    inline ? 
+                      <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">{children}</code> :
+                      <pre className="bg-black/30 rounded p-3 font-mono text-sm overflow-x-auto my-2">{children}</pre>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-4 border-[#F7931A]/50 pl-4 italic my-4 text-gray-300">
+                      {children}
+                    </blockquote>
                   ),
                 }}
               >
-                {message.content.replace(/\n+$/, '')}
+                {message.content}
               </ReactMarkdown>
             </div>
           )}
         </div>
         
-        {/* Citations section remains unchanged */}
         {!message.isUser && message.citations && message.citations.length > 0 && (
           <div className="mt-2 ml-12">
             <Button
