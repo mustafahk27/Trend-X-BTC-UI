@@ -61,7 +61,24 @@ export async function POST(request: Request) {
       const model = genAI.getGenerativeModel({ model: actualModelId });
       const chat = model.startChat();
       
-      for (const message of messages) {
+      const systemMessage = {
+        role: 'system',
+       content: `You are a helpful AI assistant. Please format your responses with:
+        - Bold headings using markdown (e.g., **Heading**)
+        - Clear paragraph separation with blank lines
+        - Strategic use of bullet points and numbered lists
+        - Proper hierarchy with headings and subheadings
+        - Professional formatting throughout
+        - Code blocks when sharing code
+        - Tables when presenting structured data`
+      };
+      
+      const formattedMessages = [systemMessage, ...messages.map(msg => ({
+        role: msg.role || (msg.isUser ? 'user' : 'assistant'),
+        content: msg.content
+      }))];
+      
+      for (const message of formattedMessages) {
         if (message.role === 'user') {
           await chat.sendMessage(message.content);
         }
@@ -77,11 +94,26 @@ export async function POST(request: Request) {
       });
     }
 
-    const completion = await groq.chat.completions.create({
-      messages: messages.map(msg => ({
+    const formattedMessages = [
+      {
+        role:'system',
+        content: `You are a helpful AI assistant. Please format your responses with:
+        - Bold headings using markdown (e.g., **Heading**)
+        - Clear paragraph separation with blank lines
+        - Strategic use of bullet points and numbered lists
+        - Proper hierarchy with headings and subheadings
+        - Professional formatting throughout
+        - Code blocks when sharing code
+        - Tables when presenting structured data`
+      },
+      ...messages.map(msg => ({
         role: msg.role || (msg.isUser ? 'user' : 'assistant'),
         content: msg.content
-      })),
+      }))
+    ];
+
+    const completion = await groq.chat.completions.create({
+      messages: formattedMessages,
       model: actualModelId,
       temperature: 0.7,
       max_tokens: 1024,

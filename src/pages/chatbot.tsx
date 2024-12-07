@@ -19,6 +19,7 @@ import { Suspense } from "react";
 import { OrbitControls } from "@react-three/drei";
 import { useUser } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
+import ReactMarkdown from 'react-markdown';
 
 type Message = {
   content: string;
@@ -184,6 +185,139 @@ const ModelSelector = ({
     </div>
   );
 };
+
+// Add custom styles for markdown formatting
+const markdownStyles = {
+  heading: "text-xl font-bold mt-4 mb-2 text-[#F7931A]",
+  subheading: "text-lg font-semibold mt-3 mb-2 text-[#F7931A]/80",
+  paragraph: "mb-4 text-gray-200",
+  list: "mb-4 ml-4 space-y-2",
+  listItem: "text-gray-200",
+};
+
+// Update the message rendering in the ChatbotPage component
+function ChatMessage({ message, user }: { message: EnhancedMessage; user: any }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
+      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-4`}
+    >
+      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%]`}>
+        <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
+          <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
+            {message.isUser ? (
+              <>
+                <AvatarImage 
+                  src={user?.imageUrl || "/user-avatar.png"} 
+                  alt={user?.fullName || "User"}
+                />
+                <AvatarFallback>{user?.firstName?.[0] || "U"}</AvatarFallback>
+              </>
+            ) : (
+              <>
+                <AvatarImage 
+                  src="/ai-avatar.png" 
+                  alt="AI Assistant" 
+                  className="object-cover w-full h-full"
+                />
+                <AvatarFallback>
+                  <img 
+                    src="/ai-avatar.png" 
+                    alt="AI" 
+                    className="w-full h-full object-cover" 
+                  />
+                </AvatarFallback>
+              </>
+            )}
+          </Avatar>
+          
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`p-4 rounded-xl ${
+              message.isUser
+                ? "bg-[#F7931A] text-black"
+                : "bg-white/10 text-white"
+            }`}
+          >
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => (
+                  <h1 className={markdownStyles.heading}>{children}</h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className={markdownStyles.subheading}>{children}</h2>
+                ),
+                p: ({ children }) => (
+                  <p className={markdownStyles.paragraph}>{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className={markdownStyles.list}>{children}</ul>
+                ),
+                li: ({ children }) => (
+                  <li className={markdownStyles.listItem}>• {children}</li>
+                ),
+                strong: ({ children }) => (
+                  <strong className="font-bold text-[#F7931A]">{children}</strong>
+                ),
+                code: ({ children }) => (
+                  <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">
+                    {children}
+                  </code>
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </motion.div>
+        </div>
+        
+        {!message.isUser && message.citations && message.citations.length > 0 && (
+          <div className="mt-2 ml-12">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleCitationClick(index)}
+              className="text-[#F7931A] hover:text-[#F7931A]/80"
+            >
+              {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
+            </Button>
+            
+            {showCitations[index] && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-2 space-y-2"
+                ref={el => citationRefs.current[index] = el}
+              >
+                {message.citations.map((citation, citIndex) => (
+                  <div
+                    key={citIndex}
+                    className="p-2 rounded bg-white/5 border border-white/10"
+                  >
+                    <a
+                      href={citation.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#F7931A] hover:underline text-sm font-medium"
+                    >
+                      {citation.title}
+                    </a>
+                    <p className="text-sm text-gray-400 mt-1">
+                      {citation.snippet}
+                    </p>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </div>
+        )}
+      </div>
+    </motion.div>
+ );
+}
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<EnhancedMessage[]>([
@@ -497,96 +631,11 @@ export default function ChatbotPage() {
           {/* Messages Area with enhanced animations */}
           <ScrollArea className="h-[calc(100%-8rem)] p-4">
             {messages.map((message, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-                className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-4`}
-              >
-                <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%]`}>
-                  <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
-                    <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
-                      {message.isUser ? (
-                        <>
-                          <AvatarImage 
-                            src={user?.imageUrl || "/user-avatar.png"} 
-                            alt={user?.fullName || "User"}
-                          />
-                          <AvatarFallback>{user?.firstName?.[0] || "U"}</AvatarFallback>
-                        </>
-                      ) : (
-                        <>
-                          <AvatarImage 
-                            src="/ai-avatar.png" 
-                            alt="AI Assistant" 
-                            className="object-cover w-full h-full"
-                          />
-                          <AvatarFallback>
-                            <img 
-                              src="/ai-avatar.png" 
-                              alt="AI" 
-                              className="w-full h-full object-cover" 
-                            />
-                          </AvatarFallback>
-                        </>
-                      )}
-                    </Avatar>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      className={`p-3 rounded-xl ${
-                        message.isUser
-                          ? "bg-[#F7931A] text-black"
-                          : "bg-white/10 text-white"
-                      }`}
-                    >
-                      {message.content}
-                    </motion.div>
-                  </div>
-                  
-                  {!message.isUser && message.citations && message.citations.length > 0 && (
-                    <div className="mt-2 ml-12">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCitationClick(index)}
-                        className="text-[#F7931A] hover:text-[#F7931A]/80"
-                      >
-                        {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
-                      </Button>
-                      
-                      {showCitations[index] && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-2 space-y-2"
-                          ref={el => citationRefs.current[index] = el}
-                        >
-                          {message.citations.map((citation, citIndex) => (
-                            <div
-                              key={citIndex}
-                              className="p-2 rounded bg-white/5 border border-white/10"
-                            >
-                              <a
-                                href={citation.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[#F7931A] hover:underline text-sm font-medium"
-                              >
-                                {citation.title}
-                              </a>
-                              <p className="text-sm text-gray-400 mt-1">
-                                {citation.snippet}
-                              </p>
-                            </div>
-                          ))}
-                        </motion.div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
+              <ChatMessage 
+                key={index} 
+                message={message} 
+                user={user}
+              />
             ))}
             {isTyping && (
               <motion.div
