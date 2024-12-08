@@ -51,6 +51,7 @@ export default function Dashboard() {
   const [historical, setHistorical] = useState<{ time: string; price: number; timestamp: number; }[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPrice, setCurrentPrice] = useState<number | null>(null);
 
   const fetchMetrics = useCallback(async () => {
     try {
@@ -89,18 +90,37 @@ export default function Dashboard() {
     }
   }, []);
 
+  const fetchCurrentPrice = useCallback(async () => {
+    try {
+      const response = await fetch('/api/getCurrentPrice');
+      if (!response.ok) {
+        throw new Error('Failed to fetch current price');
+      }
+      const data = await response.json();
+      setCurrentPrice(Number(data.price));
+    } catch (err) {
+      console.error('Error fetching current price:', err);
+    }
+  }, []);
+
   // Fetch metrics on component mount and set up periodic fetching every 5 minutes
   useEffect(() => {
     fetchMetrics();
-    const intervalId = setInterval(fetchMetrics, 5 * 60 * 1000); // Refresh every 5 minutes
-    return () => clearInterval(intervalId);
-  }, [fetchMetrics]);
+    fetchCurrentPrice();
+    const metricsInterval = setInterval(fetchMetrics, 5 * 60 * 1000); // Every 5 minutes
+    const priceInterval = setInterval(fetchCurrentPrice, 10000); // Every 10 seconds
+    
+    return () => {
+      clearInterval(metricsInterval);
+      clearInterval(priceInterval);
+    };
+  }, [fetchMetrics, fetchCurrentPrice]);
 
   // Generate stats array from metrics
   const stats = [
     {
       title: "Current Price",
-      value: metrics ? `$${metrics.High.toLocaleString()}` : 'Loading...',
+      value: currentPrice ? `$${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...',
       change: "+2.5%",
       isPositive: true,
       icon: DollarSign,
