@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ import { OrbitControls } from "@react-three/drei";
 import { useUser } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
+import { ThreeElements } from '@react-three/fiber';
+import { Components } from 'react-markdown';
 
 type Message = {
   content: string;
@@ -83,16 +85,21 @@ const tvly = tavily({
   apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
 });
 
+// Define Tavily types since they're not exported
+type TavilySearchResult = {
+  url: string;
+  title: string;
+  content: string;
+};
+
 function LoadingBitcoin() {
   return (
     <mesh>
       <cylinderGeometry args={[2, 2, 0.2, 32]} />
-      <meshPhysicalMaterial
+      <meshStandardMaterial
         color="#F7931A"
         metalness={0.9}
         roughness={0.1}
-        clearcoat={1}
-        clearcoatRoughness={0.1}
         emissive="#F7931A"
         emissiveIntensity={0.2}
       />
@@ -197,15 +204,14 @@ const markdownStyles = {
 };
 
 // Update the message rendering in the ChatbotPage component
-function ChatMessage({ message, user }: { message: EnhancedMessage; user: any }) {
+function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMessage; user: any; index: number; isTyping: boolean }) {
   const [displayedContent, setDisplayedContent] = useState('');
-  const [isTyping, setIsTyping] = useState(!message.isUser);
-  const messageRef = useRef<HTMLDivElement>(null);
-  
+  const citationRef = useRef<HTMLDivElement>(null);
+  const [showCitation, setShowCitation] = useState(false);
+
   useEffect(() => {
     if (!message.isUser) {
       setDisplayedContent('');
-      setIsTyping(true);
       
       const text = message.content;
       let currentIndex = 0;
@@ -222,24 +228,33 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
         
         if (currentIndex < text.length) {
           setTimeout(typeNextCharacter, getRandomDelay());
-        } else {
-          setIsTyping(false);
         }
       };
 
       typeNextCharacter();
 
       return () => {
-        setIsTyping(false);
+        setDisplayedContent('');
       };
     } else {
       setDisplayedContent(message.content);
     }
   }, [message.content, message.isUser]);
 
+  const handleCitationClick = useCallback(() => {
+    setShowCitation(!showCitation);
+    if (!showCitation) {
+      setTimeout(() => {
+        citationRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }, 100);
+    }
+  }, [showCitation]);
+
   return (
     <motion.div
-      ref={messageRef}
       initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
@@ -326,11 +341,13 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
                     em: ({ children }) => (
                       <em className="italic text-gray-300">{children}</em>
                     ),
-                    code: ({ inline, children }) => (
-                      inline ? 
-                        <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm">{children}</code> :
-                        <pre className="bg-black/30 rounded p-3 font-mono text-sm overflow-x-auto my-2">{children}</pre>
-                    ),
+                    code: ({ node, inline, className, children, ...props }: Components['code']) => {
+                      return inline ? (
+                        <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
+                      ) : (
+                        <pre className="bg-black/30 rounded p-3 font-mono text-sm overflow-x-auto my-2" {...props}>{children}</pre>
+                      );
+                    },
                     blockquote: ({ children }) => (
                       <blockquote className="border-l-4 border-[#F7931A]/50 pl-4 italic my-4 text-gray-300">
                         {children}
@@ -360,18 +377,18 @@ function ChatMessage({ message, user }: { message: EnhancedMessage; user: any })
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => handleCitationClick(index)}
+              onClick={handleCitationClick}
               className="text-[#F7931A] hover:text-[#F7931A]/80"
             >
-              {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
+              {showCitation ? 'Hide Citations' : 'Show Citations'}
             </Button>
-            {showCitations[index] && (
+            {showCitation && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 className="mt-2 space-y-2"
-                ref={el => citationRefs.current[index] = el}
+                ref={citationRef}
               >
                 {message.citations.map((citation, citIndex) => (
                   <div
@@ -410,11 +427,9 @@ export default function ChatbotPage() {
   const [context, setContext] = useState('General Bitcoin Analysis');
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [showCitations, setShowCitations] = useState<{[key: number]: boolean}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
   const { user } = useUser();
   const [selectedModel, setSelectedModel] = useState<LLMModel>(modelCategories[0].models[0]);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
@@ -543,7 +558,7 @@ export default function ChatbotPage() {
       const citations = searchResponse.results.map(result => ({
         url: result.url,
         title: result.title,
-        snippet: result.snippet,
+        snippet: result.content.substring(0, 200) + '...'
       }));
 
       const aiMessage = {
@@ -600,27 +615,6 @@ export default function ChatbotPage() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, []);
-
-  const handleCitationClick = (index: number) => {
-    setShowCitations(prev => {
-      const newState = {
-        ...prev,
-        [index]: !prev[index]
-      };
-      
-      // If showing citations, scroll to them after they render
-      if (newState[index]) {
-        setTimeout(() => {
-          citationRefs.current[index]?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-        }, 100);
-      }
-      
-      return newState;
-    });
-  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -714,6 +708,8 @@ export default function ChatbotPage() {
                 key={index} 
                 message={message} 
                 user={user}
+                index={index}
+                isTyping={isTyping}
               />
             ))}
             {isTyping && (
