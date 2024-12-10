@@ -225,7 +225,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="relative min-h-screen z-10 p-6 max-w-7xl mx-auto pt-24">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.title}
@@ -264,24 +264,30 @@ export default function Dashboard() {
           {/* Main Chart */}
           <Card className="lg:col-span-2 bg-black/50 backdrop-blur-sm border border-white/10 p-6">
             <h3 className="text-lg font-semibold text-white mb-4">Bitcoin Price Chart</h3>
-            <div className="h-[400px]">
+            <div className="h-[300px] sm:h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={historical || sampleData}>
                   <XAxis 
                     dataKey="time" 
                     stroke="#666" 
                     strokeWidth={0.5}
+                    tick={{ fontSize: 12 }}
+                    tickMargin={8}
                   />
                   <YAxis 
                     stroke="#666" 
                     strokeWidth={0.5}
                     domain={['auto', 'auto']}
+                    tick={{ fontSize: 12 }}
+                    width={60}
                   />
                   <Tooltip 
+                    cursor={{ strokeWidth: 2 }}
                     contentStyle={{ 
                       background: 'rgba(0,0,0,0.8)', 
                       border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      padding: '8px 12px'
                     }}
                     labelStyle={{ color: '#fff' }}
                   />

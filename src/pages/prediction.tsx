@@ -219,7 +219,7 @@ export default function PredictionPage() {
                       Our AI Model analyze over 25+ market indicators to predict Bitcoin's trajectory with 98% accuracy
                     </motion.p>
 
-                    <div className="flex justify-center gap-16 text-sm text-gray-500 mb-12">
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-16 text-sm text-gray-500 mb-8 sm:mb-12">
                       <div className="flex flex-col items-center">
                         <div className="text-[#F7931A] mb-1">25+</div>
                         <div>Indicators</div>
@@ -258,7 +258,7 @@ export default function PredictionPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: "spring", duration: 0.5 }}
               >
-                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-8 w-[400px]">
+                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-4 sm:p-8 w-[90vw] sm:w-[400px]">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

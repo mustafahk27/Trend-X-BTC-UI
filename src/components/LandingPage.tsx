@@ -528,14 +528,14 @@ export default function LandingPage() {
             transition={{ duration: 0.8 }}
             className="text-center max-w-5xl mx-auto"
           >
-            <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white tracking-tight mb-4 sm:mb-6">
               Predict Bitcoin's Future{" "}
               <span className="text-[#F7931A]">
                 with AI Precision
               </span>
             </h1>
             
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+            <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-6 sm:mb-8 px-4">
               Harness the power of machine learning for smarter crypto investments
             </p>
 
@@ -545,7 +545,7 @@ export default function LandingPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
             >
               <Link href={isSignedIn ? "/dashboard" : "/start"}>
-                <button className="bg-[#F7931A] text-black px-8 py-3 rounded-lg font-medium text-lg hover:bg-[#F7931A]/90 transition-all duration-300 transform hover:scale-105">
+                <button className="bg-[#F7931A] text-black px-6 sm:px-8 py-3 rounded-lg font-medium text-base sm:text-lg">
                   {isSignedIn ? "Go to Dashboard" : "Start Predicting Now"}
                 </button>
               </Link>

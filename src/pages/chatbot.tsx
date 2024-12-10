@@ -164,11 +164,11 @@ const ModelSelector = ({
   }, [isOpen, onToggle]);
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-20" ref={dropdownRef}>
+    <div className="fixed top-2 sm:top-6 inset-x-0 mx-auto z-50 w-full max-w-[calc(90vw-80px)] sm:max-w-[400px] px-4 sm:px-0" ref={dropdownRef}>
       <div className="relative">
         <Button
           onClick={onToggle}
-          className="bg-black/50 backdrop-blur-sm border border-white/10 hover:bg-white/5 text-white flex items-center gap-2 px-4 py-2 rounded-lg"
+          className="bg-black/50 backdrop-blur-sm border border-white/10 hover:bg-white/5 text-white flex items-center justify-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base w-full"
         >
           <span className="text-[#F7931A]">{selectedModel.name}</span>
           <ChevronDown className="h-4 w-4" />
@@ -180,7 +180,7 @@ const ModelSelector = ({
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full mt-2 w-96 bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg overflow-hidden max-h-[80vh] overflow-y-auto scrollbar-hide"
+              className="absolute top-full left-0 right-0 mt-2 w-full bg-black/90 backdrop-blur-sm border border-white/10 rounded-lg shadow-lg overflow-hidden max-h-[60vh] sm:max-h-[80vh] overflow-y-auto scrollbar-hide z-50"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none'
@@ -189,7 +189,7 @@ const ModelSelector = ({
               {modelCategories.map((category) => (
                 <div 
                   key={category.title}
-                  className="border-b border-white/10 last:border-b-0"
+                  className="border-b border-white/10 last:border-b-0 w-full"
                 >
                   <div className="px-4 py-2 bg-white/5 sticky top-0 backdrop-blur-sm">
                     <h3 className="text-sm font-semibold text-[#F7931A] uppercase tracking-wider">
@@ -211,8 +211,8 @@ const ModelSelector = ({
                             : 'text-white hover:bg-white/5'
                           }`}
                       >
-                        <div className="font-medium">{model.name}</div>
-                        <div className="text-sm text-gray-400 mt-0.5">{model.description}</div>
+                        <div className="font-medium text-sm sm:text-base">{model.name}</div>
+                        <div className="text-xs sm:text-sm text-gray-400 mt-0.5">{model.description}</div>
                       </button>
                     ))}
                   </div>
@@ -291,9 +291,9 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
       initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-2`}
+      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-3 sm:mb-2 px-2 sm:px-0`}
     >
-      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[80%] last:mb-0`}>
+      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[92vw] sm:max-w-[80%] last:mb-0`}>
         <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
           <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
             {message.isUser ? (
@@ -642,11 +642,16 @@ export default function ChatbotPage() {
         </motion.h1>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
-        <NavButton href="/" icon={Home} label="Home" />
-        <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" />
+      {/* Navigation */}
+      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex items-center gap-2 sm:gap-4">
+        <NavButton 
+          href="/dashboard" 
+          icon={ArrowLeft} 
+          label="Back" 
+          className="!px-3 sm:!px-6 !py-2 sm:!py-5" 
+        />
+        <NavButton href="/" icon={Home} label="Home" className="hidden sm:flex" />
+        <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" className="hidden sm:flex" />
       </div>
 
       {/* Model Selector */}
@@ -657,13 +662,13 @@ export default function ChatbotPage() {
         onToggle={() => setIsModelMenuOpen(!isModelMenuOpen)}
       />
 
-      {/* User Button (Logout) */}
-      <div className="fixed top-6 right-6 z-20">
+      {/* User Button */}
+      <div className="fixed top-2 sm:top-6 right-2 sm:right-6 z-20">
         <UserButton 
           afterSignOutUrl="/"
           appearance={{
             elements: {
-              avatarBox: "w-10 h-10 rounded-full border-2 border-white/10 hover:border-[#F7931A]/50 transition-all",
+              avatarBox: "w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/10 hover:border-[#F7931A]/50 transition-all",
               userButtonPopover: "bg-black/90 border border-white/10 backdrop-blur-sm",
               userButtonPopoverCard: "bg-transparent",
               userButtonPopoverActions: "bg-transparent",
@@ -684,33 +689,37 @@ export default function ChatbotPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-[#111111] text-gray-300 text-sm p-3 rounded-t-xl flex justify-between items-center border-b border-white/10"
+            className="bg-[#111111] text-gray-300 text-xs sm:text-sm p-2 sm:p-3 rounded-t-xl"
           >
-            <div className="flex items-center gap-4">
-              <span>Context: {context}</span>
-              <Link href="/prediction">
-                <Button 
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <span>Context: {context}</span>
+                <Link href="/prediction">
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+                  >
+                    <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    Generate Prediction
+                  </Button>
+                </Link>
+              </div>
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={clearContext}
                   variant="ghost"
-                  size="sm"
-                  className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A]"
+                  className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20"
                 >
-                  <Wand2 className="h-4 w-4 mr-2" />
-                  Generate Prediction
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Clear Chat
                 </Button>
-              </Link>
+              </div>
             </div>
-            <Button
-              onClick={clearContext}
-              variant="ghost"
-              className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Clear Chat
-            </Button>
           </motion.div>
 
           {/* Messages Area with enhanced animations */}
-          <ScrollArea className="h-[calc(100%-8rem)] p-4">
+          <ScrollArea className="h-[calc(100%-8rem)] p-4 relative z-10">
             {messages.map((message, index) => (
               <ChatMessage 
                 key={index} 
@@ -779,21 +788,12 @@ export default function ChatbotPage() {
           </ScrollArea>
 
           {/* Enhanced Input Area */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="fixed bottom-6 left-0 right-0 px-4 z-50"
-          >
+          <motion.div className="fixed bottom-2 sm:bottom-6 left-0 right-0 px-2 sm:px-4 z-20">
             <div className="max-w-4xl mx-auto flex justify-center">
-              <div 
-                className={`search-container-wrapper ${input ? 'expanded' : ''}`}
-                onFocus={(e) => e.currentTarget.classList.add('expanded')}
-                onBlur={(e) => !input && e.currentTarget.classList.remove('expanded')}
-              >
+              <div className={`search-container-wrapper mx-auto ${input ? 'expanded' : ''}`}>
                 <Button
                   onClick={toggleWebSearch}
-                  className={`web-search-button ${webSearchEnabled ? 'active' : ''}`}
+                  className={`web-search-button hidden sm:flex ${webSearchEnabled ? 'active' : ''}`}
                   aria-label="Toggle web search"
                 >
                   <Search className="h-4 w-4" />
@@ -805,14 +805,22 @@ export default function ChatbotPage() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
                   placeholder="Ask AI..."
-                  className="search-input"
+                  className={`search-input text-base sm:text-sm px-3 sm:px-4 ${input ? 'expanded' : ''}`}
+                  onFocus={(e) => {
+                    e.currentTarget.parentElement?.classList.add('expanded');
+                  }}
+                  onBlur={(e) => {
+                    if (!input) {
+                      e.currentTarget.parentElement?.classList.remove('expanded');
+                    }
+                  }}
                   aria-label="Chat input"
                 />
 
                 <Button
                   onClick={handleSubmit}
-                  className="send-button"
                   disabled={!input.trim()}
+                  className="send-button min-w-[40px] sm:min-w-[48px]"
                   aria-label="Send message"
                 >
                   <Send className="h-4 w-4" />
@@ -828,10 +836,10 @@ export default function ChatbotPage() {
         <motion.div
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-6 left-6 z-50 text-sm text-[#F7931A]/80 flex items-center gap-2 bg-black/50 backdrop-blur-sm py-2 px-4 rounded-full border border-[#F7931A]/20"
+          className="fixed top-16 sm:top-20 right-4 sm:right-6 z-50 text-xs sm:text-sm text-[#F7931A]/80 flex items-center gap-2 bg-black/50 backdrop-blur-sm py-1.5 px-3 rounded-full border border-[#F7931A]/20 whitespace-nowrap shadow-lg"
         >
-          <div className="w-2 h-2 bg-[#F7931A] rounded-full animate-pulse" />
-          Web Search Mode Active
+          <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-[#F7931A] rounded-full animate-pulse" />
+          <span>Web Search Mode</span>
         </motion.div>
       )}
     </div>
