@@ -5,7 +5,7 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Wand2, Database, Home, MessageSquare } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Wand2, Database, Home, MessageSquare, Users } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
@@ -223,6 +223,7 @@ export default function Dashboard() {
         <NavButton href="/" icon={Home} label="Home" />
         <NavButton href="/chatbot" icon={MessageSquare} label="AI Chat" />
         <NavButton href="/prediction" icon={Wand2} label="Predict Latest" />
+        <NavButton href="/tech-team" icon={Users} label="Tech & Team" />
       </div>
 
       {/* User Button (Logout) */}
