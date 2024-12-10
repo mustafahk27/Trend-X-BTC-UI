@@ -149,8 +149,8 @@ export default function Dashboard() {
     
     // Set up intervals
     const intervals = [
-      setInterval(fetchCurrentPrice, 10000),  // Price every 10s
-      setInterval(fetchData, 60000)  // All data every minute
+      setInterval(fetchCurrentPrice, 10000),
+      setInterval(fetchData, 60000)
     ];
     
     return () => intervals.forEach(clearInterval);
@@ -187,25 +187,6 @@ export default function Dashboard() {
       icon: Database,
     }
   ];
-
-  // Render loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
-        <div className="relative w-64 h-1 bg-white/10 rounded-full overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 bg-[#F7931A]"
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 2, ease: "easeInOut" }}
-          />
-        </div>
-        <div className="text-white text-lg font-semibold mt-4">
-          Loading metrics...
-        </div>
-      </div>
-    );
-  }
 
   // Render error state with retry option
   if (error) {
@@ -348,13 +329,13 @@ export default function Dashboard() {
                 { 
                   metric: "Net Order Flow", 
                   value: `$${metrics.net_order_flow.toLocaleString()}`, 
-                  trend: 92,
+                  trend: metrics.net_order_flow > 0 ? 75 : 25,
                   isPositive: metrics.net_order_flow > 0
                 },
                 { 
                   metric: "Active Addresses", 
                   value: metrics.num_user_addresses.toLocaleString(), 
-                  trend: 87,
+                  trend: 65,
                   isPositive: true 
                 }
               ].map((metric) => (
@@ -375,11 +356,6 @@ export default function Dashboard() {
                       }`}
                       style={{ width: `${metric.trend}%` }}
                     />
-                  </div>
-                  <div className="text-right mt-1">
-                    <span className="text-xs text-gray-400">
-                      {metric.trend}% of daily average
-                    </span>
                   </div>
                 </div>
               ))}
