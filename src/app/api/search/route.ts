@@ -21,65 +21,82 @@ When asked about alt coin recommendations:
 
 Format your response EXACTLY as follows:
 
-Market Overview:
-• Bitcoin Current Price: $[exact number from real-time data]
-• 24h Change: [number]% [trend arrow ↑/↓]
+**Market Analysis**
+• Current BTC Price: $[price from data]
 • Market Sentiment: [Fear and Greed Index] ([classification])
-• Current Trend: [Brief description based on real-time data]
+• 24h Trend: [Up/Down] [percentage]%
+• Volatility: [High/Medium/Low] based on 24h data
 
-Recommended Alternative Coins:
-[Only include coins with verified recent data and clear upward potential]
+**Key Recommendations**
+[List 3-5 coins with complete analysis]
 
-• [Coin Name] ([Symbol])
-  - Current Price: $[exact number]
-  - 24h Volume: $[exact number]
-  - 24h Change: [number]% [trend arrow ↑/↓]
-  - Market Cap: $[exact number]
+For each coin:
+• [Coin Name] ([SYMBOL])
+  - Current Price: $[price]
+  - 24h Change: [percentage]%
+  - Key Catalyst: [specific reason for recommendation]
   - Risk Level: [High/Medium/Low]
-  - Recent Development: [specific event/news] [citation]
-  - Investment Thesis: [2-3 bullet points about why it's recommended]
-  - Key Metrics:
-    * Trading Volume Trend: [increasing/decreasing]
-    * Development Activity: [active/moderate/low]
-    * Market Sentiment: [positive/neutral/negative]
+  - Technical Outlook: [Brief analysis]
 
-[List 3-5 coins with complete metrics, ordered by confidence level]
-
-Risk Warning:
+**Risk Assessment**
 • Market Condition: [Based on Fear and Greed Index]
-• Volatility Level: [Based on current market data]
-• Recommended Position Size: [Based on risk level]
+• Position Sizing: [Conservative/Moderate/Aggressive]
+• Key Warning Signs: [List specific risks]
 
-[All price and volume data must match real-time data where available, with search results providing supporting information]`;
+Citations will be handled separately by the UI - do not include source links in your analysis. Focus on providing accurate information and clear analysis.`;
+
+const ADVISOR_PROMPT = `You are a knowledgeable crypto research advisor. Based on the current market data provided, offer your insights and recommendations.
+
+Focus on:
+1. Current market conditions and sentiment
+2. Potential opportunities given the market state
+3. Risk management suggestions
+4. Specific coin recommendations with rationale
+
+Keep your response professional, factual, and focused on the data provided.`;
 
 export async function POST(request: Request) {
   try {
-    const { query } = await request.json();
+    const { query, webSearchEnabled } = await request.json();
     const searchApiKey = process.env.TAVILY_API_KEY;
     const headersList = headers();
     const host = headersList.get('host');
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
 
-    if (!searchApiKey) {
-      throw new Error('Tavily API key is not configured');
-    }
-
-    // Get current date for time-based filtering
-    const now = new Date();
-    const yesterday = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-    const dateFilter = yesterday.toISOString().split('T')[0];
-
     // Fetch current Bitcoin price and market data
     const btcResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true&include_market_cap=true');
+    if (!btcResponse.ok) {
+      throw new Error('Failed to fetch Bitcoin data');
+    }
     const btcData = await btcResponse.json();
+    if (!btcData?.bitcoin?.usd) {
+      throw new Error('Invalid Bitcoin data format');
+    }
 
     // Fetch Fear and Greed Index
     const fgResponse = await fetch('https://api.alternative.me/fng/');
+    if (!fgResponse.ok) {
+      throw new Error('Failed to fetch Fear and Greed Index');
+    }
     const fgData = await fgResponse.json();
+    if (!fgData?.data?.[0]) {
+      throw new Error('Invalid Fear and Greed Index data format');
+    }
 
-    // Fetch top 100 coins data for better alt coin analysis
-    const topCoinsResponse = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h&locale=en');
-    const topCoinsData = await topCoinsResponse.json();
+    // Try to fetch top coins data, but continue if it fails
+    let topCoinsData = [];
+    try {
+      const topCoinsResponse = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h&locale=en');
+      if (topCoinsResponse.ok) {
+        const data = await topCoinsResponse.json();
+        if (Array.isArray(data)) {
+          topCoinsData = data;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch top coins data:', error);
+      // Continue without top coins data
+    }
 
     // Prepare market context with detailed data
     const marketContext = `
@@ -92,19 +109,63 @@ Bitcoin Status:
 - Market Cap: $${btcData.bitcoin.usd_market_cap.toLocaleString()}
 - Fear and Greed Index: ${fgData.data[0].value} (${fgData.data[0].value_classification})
 
-Top Performing Altcoins (Last 24h):
+${topCoinsData.length > 0 ? `Top Performing Altcoins (Last 24h):
 ${topCoinsData
   .filter(coin => coin.symbol !== 'btc')
-  .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
+  .sort((a, b) => (b.price_change_percentage_24h || 0) - (a.price_change_percentage_24h || 0))
   .slice(0, 5)
-  .map(coin => `- ${coin.name} (${coin.symbol.toUpperCase()}): $${coin.current_price} (${coin.price_change_percentage_24h.toFixed(2)}%)`)
-  .join('\n')}
+  .map(coin => `- ${coin.name} (${coin.symbol.toUpperCase()}): $${coin.current_price} (${(coin.price_change_percentage_24h || 0).toFixed(2)}%)`)
+  .join('\n')}` : ''}
 `;
 
-    // Enhanced search query based on user's question
-    const searchQuery = query.toLowerCase().includes('alt') || query.toLowerCase().includes('alternative')
-      ? `${query} altcoin alternative cryptocurrency price analysis market cap volume changes "last 24 hours" -bitcoin -btc`
-      : `${query} cryptocurrency price volume market cap changes "last 24 hours" "current price" after:${dateFilter}`;
+    // If web search is not enabled, just use the LLM with market data
+    if (!webSearchEnabled) {
+      const llmResponse = await fetch(`${protocol}://${host}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: ADVISOR_PROMPT
+            },
+            {
+              role: 'user',
+              content: `Here is the current market data:\n\n${marketContext}\n\nBased on this data, ${query}`
+            }
+          ],
+          modelId: 'mixtral-8x7b-32k'
+        })
+      });
+
+      if (!llmResponse.ok) {
+        throw new Error('Failed to get LLM response');
+      }
+
+      const llmData = await llmResponse.json();
+
+      return NextResponse.json({
+        analysis: llmData.content,
+        marketData: {
+          bitcoin: btcData.bitcoin,
+          fearAndGreed: fgData.data[0],
+          topAltcoins: topCoinsData.slice(0, 10)
+        },
+        status: 'success'
+      });
+    }
+
+    // Web search mode - existing functionality
+    if (!searchApiKey) {
+      throw new Error('Tavily API key is not configured');
+    }
+
+    console.log('[Search] Starting web search with query:', query);
+
+    // Simpler search query without overcomplicating it
+    const searchQuery = `${query} cryptocurrency latest news price analysis`;
 
     const response = await fetch('https://api.tavily.com/search', {
       method: 'POST',
@@ -127,37 +188,32 @@ ${topCoinsData
           'bitcoinist.com',
           'cryptonews.com'
         ],
-        max_results: 15,
+        max_results: 10,
         include_answer: true,
-        include_images: false,
-        include_raw_content: true,
-        search_quality: 'high',
-        sort_by: 'relevance'
+        include_raw_content: true
       }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`API responded with status ${response.status}: ${JSON.stringify(errorData)}`);
+      console.error('[Search] Tavily API error:', response.status, response.statusText);
+      throw new Error('Failed to fetch search results');
     }
 
     const searchData = await response.json();
+    console.log('[Search] Got', searchData.results?.length || 0, 'results');
 
-    // Filter out results that don't have recent timestamps or price data
-    const filteredResults = searchData.results.filter((result: any) => {
-      const content = result.content.toLowerCase();
-      const isRecent = content.includes('hours ago') || content.includes('today') || content.includes('just') || content.includes('breaking');
-      const hasData = content.includes('price') || content.includes('volume') || content.includes('market cap');
-      return isRecent && hasData;
-    });
-
+    // No filtering - just use the results directly
+    const results = searchData.results || [];
+    
     // Format search results for citations
-    const citations: Citation[] = filteredResults.map((result: any, index: number) => ({
+    const citations: Citation[] = results.map((result: any, index: number) => ({
       id: index + 1,
       url: result.url,
       title: result.title,
       snippet: result.content
     }));
+
+    console.log('[Search] Formatted', citations.length, 'citations');
 
     // Format search context with citation numbers
     const searchContext = citations
@@ -192,7 +248,7 @@ ${topCoinsData
     const llmData = await llmResponse.json();
 
     return NextResponse.json({
-      results: filteredResults,
+      results: results,
       citations,
       analysis: llmData.content,
       marketData: {

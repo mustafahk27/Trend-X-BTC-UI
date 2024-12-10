@@ -553,7 +553,8 @@ export default function ChatbotPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          query: input
+          query: input,
+          webSearchEnabled: true
         })
       });
 
@@ -563,7 +564,7 @@ export default function ChatbotPage() {
 
       const searchData = await searchResponse.json();
       
-      if (!searchData.results) {
+      if (!searchData.results || searchData.results.length === 0) {
         throw new Error('No search results found');
       }
 
@@ -582,7 +583,7 @@ export default function ChatbotPage() {
     } catch (error) {
       console.error('Web search error:', error);
       const errorMessage: EnhancedMessage = {
-        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}`,
+        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try rephrasing your question.`,
         isUser: false,
         timestamp: new Date(),
       };
