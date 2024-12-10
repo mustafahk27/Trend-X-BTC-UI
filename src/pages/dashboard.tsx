@@ -5,23 +5,12 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Wand2, Database, Home, MessageSquare } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
 import { useEffect, useState, useCallback } from 'react';
-
-// Sample data for the chart - replace with real-time data if available
-const sampleData = [
-  { time: '00:00', price: 41000 },
-  { time: '04:00', price: 42500 },
-  { time: '08:00', price: 42000 },
-  { time: '12:00', price: 43500 },
-  { time: '16:00', price: 44000 },
-  { time: '20:00', price: 43800 },
-  { time: '24:00', price: 44200 },
-];
+import { BitcoinChart } from "@/components/ui/chart";
 
 interface BTCMetrics {
   Date: string;
@@ -37,23 +26,22 @@ interface BTCMetrics {
 
 interface APIResponse {
   metrics: BTCMetrics;
-  historical: {
-    time: string;
-    price: number;
-    timestamp: number;
-  }[];
   lastUpdated: string;
   isStale: boolean;
 }
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<BTCMetrics | null>(null);
-  const [historical, setHistorical] = useState<{ time: string; price: number; timestamp: number; }[] | null>(null);
+  const [predictions, setPredictions] = useState<{
+    x: number;
+    y: number;
+  }[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
 
   const fetchMetrics = useCallback(async () => {
+    setLoading(true);
     try {
       const response = await fetch('/api/fetchMetrics');
       if (!response.ok) {
@@ -72,19 +60,12 @@ export default function Dashboard() {
         setError('No metrics data found.');
       }
 
-      if (data.historical) {
-        console.log('Historical Data:', data.historical);
-        setHistorical(data.historical);
-      } else {
-        console.warn('No historical data found:', data);
-      }
-
       setError(null);
     } catch (err: any) {
       console.error('Fetch Error:', err);
       setError(err.message || 'Failed to load metrics data');
       setMetrics(null);
-      setHistorical(null);
+      setPredictions(null);
     } finally {
       setLoading(false);
     }
@@ -103,18 +84,77 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Fetch metrics on component mount and set up periodic fetching every 5 minutes
+  const fetchPredictions = useCallback(async () => {
+    try {
+      const response = await fetch('/api/fetchPredictions');
+      const data = await response.json();
+      
+      console.log('Raw predictions response:', data);
+
+      if (data.graphData && Array.isArray(data.graphData)) {
+        const formattedData = data.graphData
+          .map((item: { x: string | number; y: string | number }) => {
+            try {
+              // Ensure we have both x and y values
+              if (!item.x || !item.y) {
+                console.warn('Missing x or y value:', item);
+                return null;
+              }
+
+              const timestamp = typeof item.x === 'string' ? new Date(item.x).getTime() : Number(item.x);
+              const price = typeof item.y === 'string' ? parseFloat(item.y) : Number(item.y);
+              
+              if (!isNaN(timestamp) && !isNaN(price)) {
+                return {
+                  x: timestamp,
+                  y: price
+                };
+              }
+              console.warn('Invalid timestamp or price:', { timestamp, price });
+              return null;
+            } catch (error) {
+              console.error('Error processing prediction point:', error, item);
+              return null;
+            }
+          })
+          .filter((item): item is { x: number; y: number } => item !== null);
+
+        console.log('Formatted predictions:', formattedData);
+
+        if (formattedData.length > 0) {
+          setPredictions(formattedData);
+        } else {
+          console.error('No valid prediction points after formatting');
+        }
+      } else {
+        console.error('Invalid or missing graphData in predictions response');
+      }
+    } catch (err) {
+      console.error('Error fetching predictions:', err);
+    }
+  }, []);
+
+  // Fetch metrics on component mount and set up periodic fetching
   useEffect(() => {
-    fetchMetrics();
-    fetchCurrentPrice();
-    const metricsInterval = setInterval(fetchMetrics, 5 * 60 * 1000); // Every 5 minutes
-    const priceInterval = setInterval(fetchCurrentPrice, 10000); // Every 10 seconds
-    
-    return () => {
-      clearInterval(metricsInterval);
-      clearInterval(priceInterval);
+    const fetchData = async () => {
+      await Promise.all([
+        fetchMetrics(),
+        fetchCurrentPrice(),
+        fetchPredictions()
+      ]);
     };
-  }, [fetchMetrics, fetchCurrentPrice]);
+
+    // Initial fetch
+    fetchData();
+    
+    // Set up intervals
+    const intervals = [
+      setInterval(fetchCurrentPrice, 10000),  // Price every 10s
+      setInterval(fetchData, 60000)  // All data every minute
+    ];
+    
+    return () => intervals.forEach(clearInterval);
+  }, [fetchMetrics, fetchCurrentPrice, fetchPredictions]);
 
   // Generate stats array from metrics
   const stats = [
@@ -225,7 +265,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="relative min-h-screen z-10 p-6 max-w-7xl mx-auto pt-24">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.title}
@@ -262,46 +302,20 @@ export default function Dashboard() {
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
           {/* Main Chart */}
-          <Card className="lg:col-span-2 bg-black/50 backdrop-blur-sm border border-white/10 p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Bitcoin Price Chart</h3>
-            <div className="h-[300px] sm:h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={historical || sampleData}>
-                  <XAxis 
-                    dataKey="time" 
-                    stroke="#666" 
-                    strokeWidth={0.5}
-                    tick={{ fontSize: 12 }}
-                    tickMargin={8}
-                  />
-                  <YAxis 
-                    stroke="#666" 
-                    strokeWidth={0.5}
-                    domain={['auto', 'auto']}
-                    tick={{ fontSize: 12 }}
-                    width={60}
-                  />
-                  <Tooltip 
-                    cursor={{ strokeWidth: 2 }}
-                    contentStyle={{ 
-                      background: 'rgba(0,0,0,0.8)', 
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      padding: '8px 12px'
-                    }}
-                    labelStyle={{ color: '#fff' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="price" 
-                    stroke="#F7931A" 
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+          <div className="lg:col-span-2">
+            <div className="bg-black/50 backdrop-blur-sm border border-white/10 p-4">
+              <h3 className="text-lg font-semibold text-white mb-4">Bitcoin Price Prediction - Next 30 Days</h3>
+              <div className="w-full" style={{ height: 300 }}>
+                {loading ? (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    Loading chart data...
+                  </div>
+                ) : (
+                  <BitcoinChart data={predictions} />
+                )}
+              </div>
             </div>
-          </Card>
+          </div>
 
           {/* Predictions Panel */}
           <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-6">

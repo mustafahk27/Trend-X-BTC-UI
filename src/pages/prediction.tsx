@@ -65,6 +65,8 @@ function PredictionScene({ isPredicting }: { isPredicting: boolean }) {
           />
           <ChromaticAberration
             offset={isPredicting ? new Vector2(0.003, 0.003) : new Vector2(0.001, 0.001)}
+            radialModulation={false}
+            modulationOffset={0}
           />
         </EffectComposer>
 
@@ -102,31 +104,54 @@ export default function PredictionPage() {
     setIsPredicting(true);
     setShowPulse(true);
     
-    // Start charging animation
     await controls.start({
       scale: [1, 1.2, 1],
       transition: { duration: 1, repeat: 2 }
     });
     
-    // Simulate API call with dramatic animation timing
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/fetchPredictions');
+      if (!response.ok) {
+        throw new Error('Failed to fetch predictions');
+      }
+      
+      const data = await response.json();
+      const { predictions } = data;
+      
+      // Fetch current price from Binance API
+      const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+      if (!binanceResponse.ok) {
+        throw new Error('Failed to fetch price from Binance');
+      }
+      const binanceData = await binanceResponse.json();
+      const currentPrice = `$${parseFloat(binanceData.price).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })}`;
+
+      // Calculate trend based on first and last prediction
+      const firstPrice = parseFloat(predictions[0].price);
+      const lastPrice = parseFloat(predictions[predictions.length - 1].price);
+      const trend = lastPrice > firstPrice ? 'up' : 'down';
+      
       setPrediction({
-        price: "$44,850.00",
-        trend: 'up',
-        timeframe: '24h',
-        dates: [
-          { date: "Mar 20", price: "$44,850.00" },
-          { date: "Mar 21", price: "$45,200.00" },
-          { date: "Mar 22", price: "$45,750.00" },
-          { date: "Mar 23", price: "$46,100.00" },
-          { date: "Mar 24", price: "$46,500.00" },
-          { date: "Mar 25", price: "$46,800.00" },
-          { date: "Mar 26", price: "$47,200.00" },
-        ]
+        price: currentPrice,
+        trend,
+        timeframe: '7d',
+        dates: predictions.map((p: { date: string; price: string }) => ({
+          date: p.date,
+          price: `$${parseFloat(p.price).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}`
+        }))
       });
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+    } finally {
       setIsPredicting(false);
       setTimeout(() => setShowPulse(false), 500);
-    }, 3000);
+    }
   };
 
   if (isLoading) return <LoadingScreen />;
@@ -182,7 +207,7 @@ export default function PredictionPage() {
                         transition={{ delay: index * 0.2 }}
                         className="font-mono text-[#F7931A] text-sm"
                       >
-                        > {text}
+                        &gt; {text}
                         <motion.span
                           animate={{ opacity: [0, 1] }}
                           transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
@@ -219,7 +244,7 @@ export default function PredictionPage() {
                       Our AI Model analyze over 25+ market indicators to predict Bitcoin's trajectory with 98% accuracy
                     </motion.p>
 
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-16 text-sm text-gray-500 mb-8 sm:mb-12">
+                    <div className="flex justify-center gap-16 text-sm text-gray-500 mb-12">
                       <div className="flex flex-col items-center">
                         <div className="text-[#F7931A] mb-1">25+</div>
                         <div>Indicators</div>
@@ -258,7 +283,7 @@ export default function PredictionPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: "spring", duration: 0.5 }}
               >
-                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-4 sm:p-8 w-[90vw] sm:w-[400px]">
+                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-8 w-[400px]">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
