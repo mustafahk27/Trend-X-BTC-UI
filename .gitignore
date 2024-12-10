@@ -19,6 +19,9 @@
 # misc
 .DS_Store
 *.pem
+# firebase credentials
+firebase-credentials.json
+
 
 # debug
 npm-debug.log*

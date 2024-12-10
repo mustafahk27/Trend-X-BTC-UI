@@ -2,22 +2,11 @@ import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.GROQ_API_KEY;
-const geminiKey = process.env.GEMINI_API_KEY;
-
-if (!apiKey) {
-  throw new Error('GROQ_API_KEY is not defined in environment variables');
-}
-
-if (!geminiKey) {
-  throw new Error('GEMINI_API_KEY is not defined in environment variables');
-}
-
 const groq = new Groq({
-  apiKey,
+  apiKey: process.env.GROQ_API_KEY || '',
 });
 
-const genAI = new GoogleGenerativeAI(geminiKey);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const MODEL_MAP: { [key: string]: string } = {
   'mixtral-8x7b-32k': 'mixtral-8x7b-32768',
@@ -31,8 +20,6 @@ const MODEL_MAP: { [key: string]: string } = {
   'llama-3-3b-preview': 'llama-3.2-3b-preview',
   'llama-3-70b-tool': 'llama3-groq-70b-8192-tool-use-preview',
   'llama-3-8b-tool': 'llama3-groq-8b-8192-tool-use-preview',
-  'chat-api': 'mixtral-8x7b-32768',
-  'audio-api': 'whisper-large-v3'
 };
 
 export async function POST(request: Request) {
@@ -55,37 +42,18 @@ export async function POST(request: Request) {
     }
 
     const actualModelId = MODEL_MAP[modelId];
-    console.log('Using model:', actualModelId);
 
     if (modelId === 'gemini-pro' || modelId === 'gemini-flash') {
       const model = genAI.getGenerativeModel({ model: actualModelId });
       const chat = model.startChat();
       
-      const systemMessage = {
-        role: 'system',
-       content: `You are a helpful AI assistant. Please format your responses with:
-        - Bold headings using markdown (e.g., **Heading**)
-        - Clear paragraph separation with blank lines
-        - Strategic use of bullet points and numbered lists
-        - Proper hierarchy with headings and subheadings
-        - Professional formatting throughout
-        - Code blocks when sharing code
-        - Tables when presenting structured data`
-      };
-      
-      const formattedMessages = [systemMessage, ...messages.map(msg => ({
-        role: msg.role || (msg.isUser ? 'user' : 'assistant'),
-        content: msg.content
-      }))];
-      
-      for (const message of formattedMessages) {
-        if (message.role === 'user') {
-          await chat.sendMessage(message.content);
-        }
+      const systemMessage = messages.find(msg => msg.role === 'system');
+      if (systemMessage) {
+        await chat.sendMessage(systemMessage.content);
       }
       
-      const lastMessage = messages[messages.length - 1];
-      const result = await chat.sendMessage(lastMessage.content);
+      const userMessage = messages[messages.length - 1];
+      const result = await chat.sendMessage(userMessage.content);
       const response = await result.response.text();
       
       return NextResponse.json({
@@ -94,37 +62,18 @@ export async function POST(request: Request) {
       });
     }
 
-    const formattedMessages = [
-      {
-        role:'system',
-        content: `You are a helpful AI assistant. Please format your responses with:
-        - Bold headings using markdown (e.g., **Heading**)
-        - Clear paragraph separation with blank lines
-        - Strategic use of bullet points and numbered lists
-        - Proper hierarchy with headings and subheadings
-        - Professional formatting throughout
-        - Code blocks when sharing code
-        - Tables when presenting structured data`
-      },
-      ...messages.map(msg => ({
-        role: msg.role || (msg.isUser ? 'user' : 'assistant'),
-        content: msg.content
-      }))
-    ];
-
     const completion = await groq.chat.completions.create({
-      messages: formattedMessages,
+      messages: messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      })),
       model: actualModelId,
       temperature: 0.7,
       max_tokens: 1024,
     });
 
-    if (!completion.choices?.[0]?.message) {
-      throw new Error('No response from API');
-    }
-
     return NextResponse.json({
-      content: completion.choices[0].message.content,
+      content: completion.choices[0]?.message?.content || '',
       role: 'assistant'
     });
 

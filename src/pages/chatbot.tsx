@@ -23,6 +23,38 @@ import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
 import { ThreeElements } from '@react-three/fiber';
 import { Components } from 'react-markdown';
+import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+// Initialize clients with browser safety flag
+const groq = new Groq({
+  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY || '',
+  dangerouslyAllowBrowser: true
+});
+
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
+
+// Update type definitions for better type safety
+type ChatMessage = {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+};
+
+const MODEL_MAP: { [key: string]: string } = {
+  'mixtral-8x7b-32k': 'mixtral-8x7b-32768',
+  'gemma-2-9b': 'gemma2-9b-it',
+  'gemma-7b': 'gemma-7b-it',
+  'gemini-pro': 'gemini-1.5-pro',
+  'gemini-flash': 'gemini-1.5-flash',
+  'llama-3-70b-versatile': 'llama-3.1-70b-versatile',
+  'llama-3-8b-instant': 'llama-3.1-8b-instant',
+  'llama-3-1b-preview': 'llama-3.2-1b-preview',
+  'llama-3-3b-preview': 'llama-3.2-3b-preview',
+  'llama-3-70b-tool': 'llama3-groq-70b-8192-tool-use-preview',
+  'llama-3-8b-tool': 'llama3-groq-8b-8192-tool-use-preview',
+  'chat-api': 'mixtral-8x7b-32768',
+  'audio-api': 'whisper-large-v3'
+};
 
 type Message = {
   content: string;
@@ -213,7 +245,8 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
     if (!message.isUser) {
       setDisplayedContent('');
       
-      const text = message.content;
+      const text = typeof message.content === 'string' ? message.content : '';
+      if (!text) return;
       let currentIndex = 0;
 
       const getRandomDelay = () => {
@@ -445,7 +478,7 @@ export default function ChatbotPage() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMessage = {
+    const userMessage: EnhancedMessage = {
       content: input,
       isUser: true,
       timestamp: new Date(),
@@ -461,70 +494,39 @@ export default function ChatbotPage() {
         return;
       }
 
-      let response;
-      let data;
-
-      // Handle different model types
-      if (selectedModel.id.includes('vision')) {
-        response = await fetch('/api/chat-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{
-              role: 'user',
-              content: [
-                { type: 'text', text: input }
-              ]
-            }],
-            modelId: selectedModel.id
-          })
-        });
-      } 
-      else if (selectedModel.id === 'whisper-large-v3') {
-        // Handle audio transcription
-        const formData = new FormData();
-        formData.append('audio', input);
-        formData.append('modelId', selectedModel.id);
-        
-        response = await fetch('/api/audio', {
-          method: 'POST',
-          body: formData
-        });
-      }
-      else {
-        // Handle regular chat models
-        response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: `You are a helpful AI assistant. Please format your responses with:
+              - Bold headings using markdown (e.g., **Heading**)
+              - Clear paragraph separation with blank lines
+              - Strategic use of bullet points and numbered lists
+              - Proper hierarchy with headings and subheadings
+              - Professional formatting throughout
+              - Code blocks when sharing code
+              - Tables when presenting structured data`
+            },
+            {
               role: 'user',
               content: input
-            }],
-            modelId: selectedModel.id
-          })
-        });
-      }
+            }
+          ],
+          modelId: selectedModel.id
+        })
+      });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('API Error Response:', errorText);
         throw new Error('Failed to get response from API');
       }
 
-      try {
-        data = await response.json();
-      } catch (parseError) {
-        console.error('JSON Parse Error:', parseError);
-        throw new Error('Invalid response format from server');
-      }
+      const data = await response.json();
 
-      if (!data || (!data.content && !data.text)) {
-        throw new Error('Invalid response format from API');
-      }
-
-      const aiMessage = {
-        content: data.content || data.text,
+      const aiMessage: EnhancedMessage = {
+        content: data.content,
         isUser: false,
         timestamp: new Date(),
       };
@@ -532,7 +534,7 @@ export default function ChatbotPage() {
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error details:', error);
-      const errorMessage = {
+      const errorMessage: EnhancedMessage = {
         content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try again.`,
         isUser: false,
         timestamp: new Date(),
@@ -546,35 +548,40 @@ export default function ChatbotPage() {
   const handleWebSearch = async () => {
     setIsSearching(true);
     try {
-      if (!process.env.NEXT_PUBLIC_TAVILY_API_KEY) {
-        throw new Error('Tavily API key is not configured');
-      }
-
-      const searchResponse = await tvly.search(input, {
-        searchDepth: "advanced",
-        includeRawContent: true,
+      // Get search results and analysis
+      const searchResponse = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          query: input
+        })
       });
 
-      const citations = searchResponse.results.map(result => ({
-        url: result.url,
-        title: result.title,
-        snippet: result.content.substring(0, 200) + '...'
-      }));
+      if (!searchResponse.ok) {
+        throw new Error('Failed to get search results');
+      }
 
-      const aiMessage = {
-        content: searchResponse.results
-          .slice(0, 3)
-          .map(r => r.content)
-          .join('\n\n'),
+      const searchData = await searchResponse.json();
+      
+      if (!searchData.results) {
+        throw new Error('No search results found');
+      }
+
+      const aiMessage: EnhancedMessage = {
+        content: searchData.analysis,
         isUser: false,
         timestamp: new Date(),
-        citations,
+        citations: searchData.citations.map((citation: any) => ({
+          url: citation.url,
+          title: citation.title,
+          snippet: citation.snippet
+        }))
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Web search error:', error);
-      const errorMessage = {
+      const errorMessage: EnhancedMessage = {
         content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}`,
         isUser: false,
         timestamp: new Date(),
