@@ -11,6 +11,9 @@ import { UserButton } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
 import { useEffect, useState, useCallback } from 'react';
 import { BitcoinChart } from "@/components/ui/chart";
+import { BinanceTicker } from "@/components/BinanceTicker";
+import { OrderFlowTicker } from "@/components/OrderFlowTicker";
+import { ActiveAddressesTicker } from "@/components/ActiveAddressesTicker";
 
 interface BTCMetrics {
   Date: string;
@@ -39,6 +42,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [activeAddressMetrics, setActiveAddressMetrics] = useState({
+    trend: 65,
+    isPositive: true
+  });
 
   const fetchMetrics = useCallback(async () => {
     setLoading(true);
@@ -161,7 +168,7 @@ export default function Dashboard() {
     {
       title: "Current Price",
       value: currentPrice ? `$${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...',
-      change: "+2.5%",
+//      change: "+2.5%",
       isPositive: true,
       icon: DollarSign,
     },
@@ -260,6 +267,11 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm text-gray-400">{stat.title}</p>
                     <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
+                    {stat.title === "Current Price" && (
+                      <div className="mt-2">
+                        <BinanceTicker />
+                      </div>
+                    )}
                     {stat.change && (
                       <div className={`flex items-center mt-2 ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
                         {stat.isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
@@ -329,15 +341,17 @@ export default function Dashboard() {
               {metrics && [
                 { 
                   metric: "Net Order Flow", 
-                  value: `$${metrics.net_order_flow.toLocaleString()}`, 
-                  trend: metrics.net_order_flow > 0 ? 75 : 25,
-                  isPositive: metrics.net_order_flow > 0
+                  value: <OrderFlowTicker />,
+                  trend: 65,
+                  isPositive: true 
                 },
                 { 
                   metric: "Active Addresses", 
-                  value: metrics.num_user_addresses.toLocaleString(), 
-                  trend: 65,
-                  isPositive: true 
+                  value: <ActiveAddressesTicker 
+                    onDataUpdate={setActiveAddressMetrics}
+                  />,
+                  trend: activeAddressMetrics.trend,
+                  isPositive: activeAddressMetrics.isPositive
                 }
               ].map((metric) => (
                 <div 
