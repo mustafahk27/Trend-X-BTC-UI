@@ -6,7 +6,7 @@ import { Float, Sparkles, Trail } from '@react-three/drei';
 import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
-import { TextureLoader, Group, PlaneGeometry, RingGeometry, BoxGeometry, CylinderGeometry } from 'three';
+import { TextureLoader, Group } from 'three';
 
 interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
