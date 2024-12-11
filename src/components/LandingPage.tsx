@@ -3,23 +3,15 @@
 import { useState, Suspense, useRef, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
 import { Canvas, useFrame, extend as extendThree, type Object3DNode } from '@react-three/fiber'
-import { OrbitControls, Environment, Float, Text, Points } from '@react-three/drei'
+import { OrbitControls, Environment, Float } from '@react-three/drei'
 import * as THREE from 'three'
-import { Group, Mesh, Object3DEventMap, Vector3, Vector2 } from 'three'
+import { Group, Vector3, Vector2 } from 'three'
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing'
 import { useSpring, animated } from '@react-spring/three'
-import { 
-  Sparkles, 
-  Trail, 
-  MeshDistortMaterial, 
-  MeshWobbleMaterial,
-  shaderMaterial,
-} from '@react-three/drei'
+import { Sparkles, shaderMaterial } from '@react-three/drei'
 import { useLoader } from '@react-three/fiber'
 import { TextureLoader } from 'three'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
 import { useAuth } from "@clerk/nextjs";
 import WelcomeLoader from './WelcomeLoader';
 
@@ -78,16 +70,17 @@ const HolographicMaterial = shaderMaterial(
 // Extend Three.js with the custom material
 extendThree({ HolographicMaterial })
 
-// Updated type declaration using Object3DNode
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      holographicMaterial: Object3DNode<
-        THREE.ShaderMaterial,
-        typeof HolographicMaterial
-      >
-    }
-  }
+// Define custom element type
+interface CustomElements {
+  holographicMaterial: Object3DNode<
+    THREE.ShaderMaterial,
+    typeof HolographicMaterial
+  >
+}
+
+// Extend JSX.IntrinsicElements
+declare module '@react-three/fiber' {
+  interface ThreeElements extends CustomElements {}
 }
 
 function ParticleRing({ radius = 2, count = 80 }) {
@@ -192,23 +185,6 @@ function CircularText() {
         )
       })}
     </group>
-  )
-}
-
-function CoinWithTexture() {
-  const bitcoinTexture = useLoader(TextureLoader, '/bitcoin-logo.png') // You'll need to add this image to public folder
-  
-  return (
-    <mesh position={[0, 0, 0.15]} rotation={[Math.PI / 2, 0, 0]}>
-      <cylinderGeometry args={[3, 3, 0.3, 64]} />
-      <meshStandardMaterial
-        color="#FFD700"
-        metalness={0.8}
-        roughness={0.2}
-        map={bitcoinTexture}
-        envMapIntensity={1.5}
-      />
-    </mesh>
   )
 }
 
@@ -529,7 +505,7 @@ export default function LandingPage() {
             className="text-center max-w-5xl mx-auto"
           >
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white tracking-tight mb-4 sm:mb-6">
-              Predict Bitcoin's Future{" "}
+              Predict Bitcoin&apos;s Future{" "}
               <span className="text-[#F7931A]">
                 with AI Precision
               </span>

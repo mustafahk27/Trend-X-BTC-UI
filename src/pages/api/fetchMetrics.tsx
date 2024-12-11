@@ -69,8 +69,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       lastUpdated: latestTimestamp.toISOString(),
       isStale: hoursDifference > 1
     });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('API Error:', error);
-    res.status(500).json({ error: error.message || 'Internal Server Error' });
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Internal Server Error' 
+    });
   }
 }
