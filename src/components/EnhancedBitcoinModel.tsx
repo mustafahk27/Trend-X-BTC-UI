@@ -7,7 +7,6 @@ import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader, Group } from 'three';
-import type { ThreeElements } from '@react-three/fiber';
 
 interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
