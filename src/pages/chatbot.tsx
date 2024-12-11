@@ -374,7 +374,7 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
                     em: ({ children }) => (
                       <em className="italic text-gray-300">{children}</em>
                     ),
-                    code: ({ node, inline, className, children, ...props }: Components['code']) => {
+                    code: ({ inline, children, ...props }: Components['code']) => {
                       return inline ? (
                         <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
                       ) : (
@@ -462,7 +462,6 @@ export default function ChatbotPage() {
   const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const { user } = useUser();
   const [selectedModel, setSelectedModel] = useState<LLMModel>(modelCategories[0].models[0]);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
@@ -529,6 +528,15 @@ export default function ChatbotPage() {
         content: data.content,
         isUser: false,
         timestamp: new Date(),
+        citations: data.citations.map((citation: {
+          url: string;
+          title: string;
+          snippet: string;
+        }) => ({
+          url: citation.url,
+          title: citation.title,
+          snippet: citation.snippet
+        }))
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -572,7 +580,11 @@ export default function ChatbotPage() {
         content: searchData.analysis,
         isUser: false,
         timestamp: new Date(),
-        citations: searchData.citations.map((citation: any) => ({
+        citations: searchData.citations.map((citation: {
+          url: string;
+          title: string;
+          snippet: string;
+        }) => ({
           url: citation.url,
           title: citation.title,
           snippet: citation.snippet

@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Sparkles, Environment, Float } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LoadingScreen from "@/components/LoadingScreen";
-import Link from 'next/link';
-import { Home, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { EnhancedBitcoinModel } from "@/components/EnhancedBitcoinModel";
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
