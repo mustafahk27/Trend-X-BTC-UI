@@ -1,6 +1,25 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
+// Define proper types for the API
+interface MessageContent {
+  type: string;
+  text?: string;
+  image_url?: {
+    url: string;
+  };
+}
+
+interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string | MessageContent[];
+}
+
+interface ErrorResponse {
+  message: string;
+  status: number;
+}
+
 const apiKey = process.env.GROQ_API_KEY;
 
 if (!apiKey) {
@@ -32,10 +51,10 @@ export async function POST(request: Request) {
     }
 
     const imageContent = latestMessage.content.find(
-      (item: { type: string }) => item.type === 'image_url'
+      (item: MessageContent) => item.type === 'image_url'
     );
     const textContent = latestMessage.content.find(
-      (item: { type: string }) => item.type === 'text'
+      (item: MessageContent) => item.type === 'text'
     );
 
     if (!imageContent?.image_url?.url) {
@@ -46,14 +65,13 @@ export async function POST(request: Request) {
       /^data:image\/\w+;base64,/, ''
     );
 
-    // Create a properly typed message for Groq API
-    const systemMessage = {
-      role: 'system' as const,
+    const systemMessage: ChatMessage = {
+      role: 'system',
       content: 'You are a helpful AI assistant that can analyze images and provide detailed insights.'
     };
 
-    const userMessage = {
-      role: 'user' as const,
+    const userMessage: ChatMessage = {
+      role: 'user',
       content: [
         { 
           type: 'text', 
@@ -69,7 +87,7 @@ export async function POST(request: Request) {
     };
 
     const completion = await groq.chat.completions.create({
-      messages: [systemMessage, userMessage],
+      messages: [systemMessage, userMessage] as any, // Type assertion needed for Groq SDK compatibility
       model: "llama-3.2-11b-vision-preview",
       temperature: 0.5,
       max_tokens: 8192,
@@ -82,14 +100,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(completion.choices[0].message);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in chat-image API:', error);
     
-    // Provide more specific error messages
     let errorMessage = 'Sorry, there was an error processing your image. Please try again.';
     let statusCode = 500;
 
-    if (error?.message?.includes('Invalid API Key')) {
+    if (error instanceof Error && error.message.includes('Invalid API Key')) {
       errorMessage = 'Invalid API key. Please check your GROQ_API_KEY configuration.';
       statusCode = 401;
     }

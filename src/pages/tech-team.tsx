@@ -47,8 +47,8 @@ const teamMembers = [
     }
   },
   {
-    name: 'Mustafa Hussein',
-    role: 'Ai/ML Engineer',
+    name: 'Mustafa Khan',
+    role: 'AI/ML Engineer',
     image: '/team-member-2.jpg',
     description: 'Expert in predictive modeling and AI solutions development.',
     socials: {
