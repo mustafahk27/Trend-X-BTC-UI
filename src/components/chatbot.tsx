@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const Chatbot = () => {
   const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const [messages, setMessages] = React.useState([]);
+  const [messages] = React.useState([]);
   const [showCitations, setShowCitations] = React.useState({});
 
   const handleCitationClick = (index: number) => {
@@ -37,10 +37,7 @@ const Chatbot = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowCitations(prev => ({
-                  ...prev,
-                  [index]: !prev[index]
-                }))}
+                onClick={() => handleCitationClick(index)}
                 className="text-[#F7931A] hover:text-[#F7931A]/80"
               >
                 {showCitations[index] ? 'Hide Citations' : 'Show Citations'}

@@ -8,23 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search, ChevronDown, Users } from "lucide-react";
+import { RefreshCw, Send, ArrowLeft, BarChart2, Search, ChevronDown, Users } from "lucide-react";
 import Link from 'next/link';
-import { UserButton } from "@clerk/nextjs";
-import { Sparkles } from "@react-three/drei";
-import FloatingBitcoins from "@/components/FloatingBitcoins";
+import Image from 'next/image';
+import { UserButton, useUser, UserResource } from "@clerk/nextjs";
 import { Wand2 } from "lucide-react";
-import { tavily } from "@tavily/core";
-import { Canvas } from "@react-three/fiber";
-import { Suspense } from "react";
-import { OrbitControls } from "@react-three/drei";
-import { useUser } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
-import { ThreeElements } from '@react-three/fiber';
-import { Components } from 'react-markdown';
 import Groq from 'groq-sdk';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize clients with browser safety flag
 const groq = new Groq({
@@ -32,34 +23,24 @@ const groq = new Groq({
   dangerouslyAllowBrowser: true
 });
 
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
+// Note: These APIs are prepared for future use in advanced features
+/* const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
+const tvly = tavily({ 
+  apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
+}); */
 
-// Update type definitions for better type safety
-type ChatMessage = {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-};
-
-const MODEL_MAP: { [key: string]: string } = {
-  'mixtral-8x7b-32k': 'mixtral-8x7b-32768',
-  'gemma-2-9b': 'gemma2-9b-it',
-  'gemma-7b': 'gemma-7b-it',
-  'gemini-pro': 'gemini-1.5-pro',
-  'gemini-flash': 'gemini-1.5-flash',
-  'llama-3-70b-versatile': 'llama-3.1-70b-versatile',
-  'llama-3-8b-instant': 'llama-3.1-8b-instant',
-  'llama-3-1b-preview': 'llama-3.2-1b-preview',
-  'llama-3-3b-preview': 'llama-3.2-3b-preview',
-  'llama-3-70b-tool': 'llama3-groq-70b-8192-tool-use-preview',
-  'llama-3-8b-tool': 'llama3-groq-8b-8192-tool-use-preview',
-  'chat-api': 'mixtral-8x7b-32768',
-  'audio-api': 'whisper-large-v3'
-};
+type UserType = UserResource | null;
 
 type Message = {
   content: string;
   isUser: boolean;
   timestamp: Date;
+};
+
+// Update type definitions for better type safety
+type ChatMessage = {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
 };
 
 type Citation = {
@@ -112,32 +93,12 @@ const modelCategories: ModelCategory[] = [
   }
 ];
 
-// Initialize Tavily client outside the component
-const tvly = tavily({ 
-  apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
-});
-
-// Define Tavily types since they're not exported
-type TavilySearchResult = {
+// Note: This type is used for API response handling
+/* type TavilySearchResult = {
   url: string;
   title: string;
   content: string;
-};
-
-function LoadingBitcoin() {
-  return (
-    <mesh>
-      <cylinderGeometry args={[2, 2, 0.2, 32]} />
-      <meshStandardMaterial
-        color="#F7931A"
-        metalness={0.9}
-        roughness={0.1}
-        emissive="#F7931A"
-        emissiveIntensity={0.2}
-      />
-    </mesh>
-  );
-}
+}; */
 
 const ModelSelector = ({ 
   selectedModel, 
@@ -226,17 +187,11 @@ const ModelSelector = ({
   );
 };
 
-// Add custom styles for markdown formatting
-const markdownStyles = {
-  heading: "text-xl font-bold mt-4 mb-2 text-[#F7931A]",
-  subheading: "text-lg font-semibold mt-3 mb-2 text-[#F7931A]/80",
-  paragraph: "mb-4 text-gray-200",
-  list: "mb-4 ml-4 space-y-2",
-  listItem: "text-gray-200",
-};
-
-// Update the message rendering in the ChatbotPage component
-function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMessage; user: any; index: number; isTyping: boolean }) {
+const ChatMessage = ({ message, user, isTyping }: { 
+  message: EnhancedMessage; 
+  user: UserType | null; 
+  isTyping: boolean 
+}) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const citationRef = useRef<HTMLDivElement>(null);
   const [showCitation, setShowCitation] = useState(false);
@@ -312,10 +267,12 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
                   className="object-cover w-full h-full"
                 />
                 <AvatarFallback>
-                  <img 
+                  <Image 
                     src="/ai-avatar.png" 
                     alt="AI" 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-cover"
+                    width={40}
+                    height={40}
                   />
                 </AvatarFallback>
               </>
@@ -374,7 +331,10 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
                     em: ({ children }) => (
                       <em className="italic text-gray-300">{children}</em>
                     ),
-                    code: ({ node, inline, className, children, ...props }: Components['code']) => {
+                    code: ({ inline, children, ...props }: { 
+                      inline?: boolean; 
+                      children?: React.ReactNode;
+                    } & React.HTMLAttributes<HTMLElement>) => {
                       return inline ? (
                         <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
                       ) : (
@@ -446,7 +406,7 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
       </div>
     </motion.div>
   );
-}
+};
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<EnhancedMessage[]>([
@@ -457,12 +417,10 @@ export default function ChatbotPage() {
     },
   ]);
   const [input, setInput] = useState('');
-  const [context, setContext] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
   const { user } = useUser();
   const [selectedModel, setSelectedModel] = useState<LLMModel>(modelCategories[0].models[0]);
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
@@ -494,39 +452,31 @@ export default function ChatbotPage() {
         return;
       }
 
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: `You are a helpful AI assistant. Please format your responses with:
-              - Bold headings using markdown (e.g., **Heading**)
-              - Clear paragraph separation with blank lines
-              - Strategic use of bullet points and numbered lists
-              - Proper hierarchy with headings and subheadings
-              - Professional formatting throughout
-              - Code blocks when sharing code
-              - Tables when presenting structured data`
-            },
-            {
-              role: 'user',
-              content: input
-            }
-          ],
-          modelId: selectedModel.id
-        })
+      const completion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a helpful AI assistant. Please format your responses with:
+            - Bold headings using markdown (e.g., **Heading**)
+            - Clear paragraph separation with blank lines
+            - Strategic use of bullet points and numbered lists
+            - Proper hierarchy with headings and subheadings
+            - Professional formatting throughout
+            - Code blocks when sharing code
+            - Tables when presenting structured data`
+          },
+          {
+            role: 'user',
+            content: input
+          }
+        ],
+        model: selectedModel.id,
+        temperature: 0.7,
+        max_tokens: 1000,
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response from API');
-      }
-
-      const data = await response.json();
-
       const aiMessage: EnhancedMessage = {
-        content: data.content,
+        content: completion.choices[0]?.message?.content || 'No response generated.',
         isUser: false,
         timestamp: new Date(),
       };
@@ -572,7 +522,11 @@ export default function ChatbotPage() {
         content: searchData.analysis,
         isUser: false,
         timestamp: new Date(),
-        citations: searchData.citations.map((citation: any) => ({
+        citations: searchData.citations.map((citation: {
+          url: string;
+          title: string;
+          snippet: string;
+        }) => ({
           url: citation.url,
           title: citation.title,
           snippet: citation.snippet
@@ -594,7 +548,6 @@ export default function ChatbotPage() {
   };
 
   const clearContext = () => {
-    setContext('General Bitcoin Analysis');
     setMessages([{
       content: "Context cleared. How can I help you with Bitcoin analysis?",
       isUser: false,
@@ -604,8 +557,6 @@ export default function ChatbotPage() {
 
   const toggleWebSearch = () => {
     setWebSearchEnabled(prev => !prev);
-    setShowTooltip(true);
-    setTimeout(() => setShowTooltip(false), 2000); // Hide tooltip after 2 seconds
   };
 
   const handleSubmit = () => {
@@ -627,7 +578,6 @@ export default function ChatbotPage() {
   return (
     <div className="min-h-screen bg-black">
       {/* Background Elements */}
-      <FloatingBitcoins />
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />
       </div>
@@ -734,7 +684,6 @@ export default function ChatbotPage() {
                 key={index} 
                 message={message} 
                 user={user}
-                index={index}
                 isTyping={isTyping}
               />
             ))}
@@ -751,10 +700,12 @@ export default function ChatbotPage() {
                     className="object-cover w-full h-full"
                   />
                   <AvatarFallback>
-                    <img 
+                    <Image 
                       src="/ai-avatar.png" 
                       alt="AI" 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover"
+                      width={40}
+                      height={40}
                     />
                   </AvatarFallback>
                 </Avatar>
@@ -778,7 +729,7 @@ export default function ChatbotPage() {
                     className="object-cover w-full h-full"
                   />
                   <AvatarFallback>
-                    <img 
+                    <Image 
                       src="/ai-avatar.png" 
                       alt="AI" 
                       className="w-full h-full object-cover" 

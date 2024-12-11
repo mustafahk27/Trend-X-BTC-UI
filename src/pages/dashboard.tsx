@@ -68,9 +68,9 @@ export default function Dashboard() {
       }
 
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Fetch Error:', err);
-      setError(err.message || 'Failed to load metrics data');
+      setError(err instanceof Error ? err.message : 'Failed to load metrics data');
       setMetrics(null);
       setPredictions(null);
     } finally {

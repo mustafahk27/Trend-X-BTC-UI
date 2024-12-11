@@ -34,7 +34,7 @@ export default function StartPage() {
             Welcome to <span className="text-[#F7931A]">TREND-X-BTC</span>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Choose your path to start predicting Bitcoin's future with AI precision
+            Choose your path to start predicting Bitcoin&apos;s future with AI precision
           </p>
         </motion.div>
 

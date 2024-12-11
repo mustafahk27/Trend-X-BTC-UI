@@ -1,52 +1,42 @@
 'use client'
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import dynamic from 'next/dynamic';
 
-const generateRandomPosition = (width = 1000, height = 1000) => ({
-  x: Math.random() * width,
-  y: Math.random() * height,
-  rotation: Math.random() * 360,
-  scale: 0.5 + Math.random() * 0.5,
-});
+interface Bitcoin {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  speed: number;
+}
 
 function FloatingBitcoins() {
-  const [mounted, setMounted] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 1000 });
-  const [bitcoins, setBitcoins] = useState(() => 
-    Array(5).fill(null).map(() => generateRandomPosition())
-  );
+  const [bitcoins, setBitcoins] = useState<Bitcoin[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-    setDimensions({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-
-    const interval = setInterval(() => {
-      setBitcoins(prev => prev.map(() => generateRandomPosition(window.innerWidth, window.innerHeight)));
-    }, 5000);
-
-    const handleResize = () => {
-      setDimensions({
-        width: window.innerWidth,
-        height: window.innerHeight
-      });
+    const updateBitcoins = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const newBitcoins = Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        x: Math.random() * rect.width,
+        y: Math.random() * rect.height,
+        size: Math.random() * 20 + 10,
+        speed: Math.random() * 1 + 0.5,
+      }));
+      setBitcoins(newBitcoins);
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('resize', handleResize);
-    };
+    updateBitcoins();
+    window.addEventListener('resize', updateBitcoins);
+    return () => window.removeEventListener('resize', updateBitcoins);
   }, []);
 
-  if (!mounted) return null;
-
   return (
-    <div className="fixed inset-0 pointer-events-none z-0">
+    <div className="fixed inset-0 pointer-events-none z-0" ref={containerRef}>
       {bitcoins.map((bitcoin, index) => (
         <motion.div
           key={`bitcoin-${index}`}
@@ -59,11 +49,11 @@ function FloatingBitcoins() {
           animate={{
             x: bitcoin.x,
             y: bitcoin.y,
-            rotate: bitcoin.rotation,
-            scale: bitcoin.scale,
+            rotate: 0,
+            scale: bitcoin.size,
           }}
           transition={{
-            duration: 5,
+            duration: bitcoin.speed,
             ease: "easeInOut",
             repeat: Infinity,
             repeatType: "reverse",

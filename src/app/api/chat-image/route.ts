@@ -8,14 +8,18 @@ if (!apiKey) {
 }
 
 const groq = new Groq({
-  apiKey: apiKey || ''
+  apiKey: apiKey || '',
+  dangerouslyAllowBrowser: true
 });
 
 export async function POST(request: Request) {
   if (!apiKey) {
     return NextResponse.json(
-      { role: 'assistant', content: 'API key not configured' },
-      { status: 500 }
+      { 
+        role: 'assistant', 
+        content: 'API key is not configured. Please add GROQ_API_KEY to your environment variables.' 
+      },
+      { status: 401 }
     );
   }
 
@@ -42,8 +46,14 @@ export async function POST(request: Request) {
       /^data:image\/\w+;base64,/, ''
     );
 
-    const analysisMessage = {
-      role: 'user',
+    // Create a properly typed message for Groq API
+    const systemMessage = {
+      role: 'system' as const,
+      content: 'You are a helpful AI assistant that can analyze images and provide detailed insights.'
+    };
+
+    const userMessage = {
+      role: 'user' as const,
       content: [
         { 
           type: 'text', 
@@ -59,7 +69,7 @@ export async function POST(request: Request) {
     };
 
     const completion = await groq.chat.completions.create({
-      messages: [analysisMessage],
+      messages: [systemMessage, userMessage],
       model: "llama-3.2-11b-vision-preview",
       temperature: 0.5,
       max_tokens: 8192,
@@ -72,14 +82,24 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(completion.choices[0].message);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in chat-image API:', error);
+    
+    // Provide more specific error messages
+    let errorMessage = 'Sorry, there was an error processing your image. Please try again.';
+    let statusCode = 500;
+
+    if (error?.message?.includes('Invalid API Key')) {
+      errorMessage = 'Invalid API key. Please check your GROQ_API_KEY configuration.';
+      statusCode = 401;
+    }
+
     return NextResponse.json(
       { 
         role: 'assistant', 
-        content: 'Sorry, there was an error processing your image. Please try again.' 
+        content: errorMessage 
       },
-      { status: 500 }
+      { status: statusCode }
     );
   }
 } 

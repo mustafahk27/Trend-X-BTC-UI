@@ -77,8 +77,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       graphData,
       lastUpdated: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('Error fetching predictions:', error);
-    res.status(500).json({ error: error.message || 'Failed to fetch predictions' });
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Failed to fetch predictions' 
+    });
   }
 }

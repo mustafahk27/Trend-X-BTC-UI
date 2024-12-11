@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls, Sparkles } from "@react-three/drei";
-import * as THREE from 'three';
 
 function LoadingBitcoin() {
   return (

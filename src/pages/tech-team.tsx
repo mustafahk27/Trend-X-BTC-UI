@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Brain, Database, Code, Layers, Clock } from "lucide-react";
 import Image from 'next/image';
-import { useRouter } from 'next/router';
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { NavButton } from "@/components/ui/nav-button";
 import { BarChart2, MessageSquare } from "lucide-react";
@@ -130,8 +128,6 @@ const dataSources = [
 ];
 
 export default function TechTeam() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen bg-black">
       {/* Background Elements */}

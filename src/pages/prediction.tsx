@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Sparkles, Environment, Float } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LoadingScreen from "@/components/LoadingScreen";
-import Link from 'next/link';
-import { Home, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { EnhancedBitcoinModel } from "@/components/EnhancedBitcoinModel";
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
@@ -86,7 +85,6 @@ function PredictionScene({ isPredicting }: { isPredicting: boolean }) {
 export default function PredictionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isPredicting, setIsPredicting] = useState(false);
-  const [showPulse, setShowPulse] = useState(false);
   const [prediction, setPrediction] = useState<null | {
     price: string;
     trend: 'up' | 'down';
@@ -102,7 +100,6 @@ export default function PredictionPage() {
 
   const handlePredict = async () => {
     setIsPredicting(true);
-    setShowPulse(true);
     
     await controls.start({
       scale: [1, 1.2, 1],
@@ -150,7 +147,6 @@ export default function PredictionPage() {
       console.error('Error fetching predictions:', error);
     } finally {
       setIsPredicting(false);
-      setTimeout(() => setShowPulse(false), 500);
     }
   };
 
@@ -241,7 +237,7 @@ export default function PredictionPage() {
                       animate={{ opacity: 1 }}
                       className="text-gray-400 text-lg max-w-2xl mx-auto mb-8"
                     >
-                      Our AI Model analyze over 25+ market indicators to predict Bitcoin's trajectory with 98% accuracy
+                      Our AI Model analyze over 25+ market indicators to predict Bitcoin&apos;s trajectory with 98% accuracy
                     </motion.p>
 
                     <div className="flex justify-center gap-16 text-sm text-gray-500 mb-12">
@@ -270,7 +266,7 @@ export default function PredictionPage() {
                       onClick={handlePredict}
                       className="relative bg-gradient-to-r from-[#F7931A] to-[#FFB347] text-black px-12 py-8 rounded-2xl font-bold text-xl hover:opacity-90 transition-all duration-300"
                     >
-                      Predict Bitcoin's Price
+                      Predict Bitcoin&apos;s Price
                     </Button>
                   </motion.div>
                 </>
@@ -298,7 +294,7 @@ export default function PredictionPage() {
                       </div>
                       <div className="space-y-2">
                         <p className="text-gray-400 mb-2">7-Day Forecast</p>
-                        {prediction?.dates?.map((day, index) => (
+                        {prediction?.dates?.map((day) => (
                           <div key={day.date} className="flex justify-between items-center py-2 border-b border-white/10">
                             <span className="text-gray-400">{day.date}</span>
                             <span className="text-[#F7931A] font-semibold">{day.price}</span>

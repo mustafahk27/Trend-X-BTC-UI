@@ -28,14 +28,14 @@ declare global {
       'motion.p': HTMLMotionProps<'p'>
       'motion.span': HTMLMotionProps<'span'>
       'motion.h1': HTMLMotionProps<'h1'>
-      Link: any
-      Card: any
-      Button: any
-      Input: any
-      ScrollArea: any
-      Avatar: any
-      AvatarImage: any
-      AvatarFallback: any
+      Link: DetailedHTMLProps<HTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>
+      Card: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+      Button: DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>
+      Input: DetailedHTMLProps<HTMLAttributes<HTMLInputElement>, HTMLInputElement>
+      ScrollArea: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+      Avatar: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+      AvatarImage: DetailedHTMLProps<HTMLAttributes<HTMLImageElement>, HTMLImageElement>
+      AvatarFallback: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>
     }
   }
 }
