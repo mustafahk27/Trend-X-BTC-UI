@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
+// Define error interface
+interface APIError extends Error {
+  message: string;
+  type?: string;
+  code?: string;
+}
+
 const apiKey = process.env.GROQ_API_KEY;
 
 if (!apiKey) {
@@ -82,14 +89,15 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(completion.choices[0].message);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in chat-image API:', error);
     
     // Provide more specific error messages
     let errorMessage = 'Sorry, there was an error processing your image. Please try again.';
     let statusCode = 500;
 
-    if (error?.message?.includes('Invalid API Key')) {
+    // Type guard to check if error is our APIError type
+    if (error instanceof Error && (error as APIError).message?.includes('Invalid API Key')) {
       errorMessage = 'Invalid API key. Please check your GROQ_API_KEY configuration.';
       statusCode = 401;
     }
