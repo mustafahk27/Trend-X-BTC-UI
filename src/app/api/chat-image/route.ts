@@ -10,9 +10,15 @@ interface MessageContent {
   };
 }
 
-interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string | MessageContent[];
+// Update types to match Groq SDK requirements
+interface SystemMessage {
+  role: 'system';
+  content: string;
+}
+
+interface UserMessage {
+  role: 'user';
+  content: MessageContent[];
 }
 
 const apiKey = process.env.GROQ_API_KEY;
@@ -60,12 +66,12 @@ export async function POST(request: Request) {
       /^data:image\/\w+;base64,/, ''
     );
 
-    const systemMessage: ChatMessage = {
+    const systemMessage: SystemMessage = {
       role: 'system',
       content: 'You are a helpful AI assistant that can analyze images and provide detailed insights.'
     };
 
-    const userMessage: ChatMessage = {
+    const userMessage: UserMessage = {
       role: 'user',
       content: [
         { 
@@ -82,7 +88,6 @@ export async function POST(request: Request) {
     };
 
     const completion = await groq.chat.completions.create({
-      // @ts-expect-error - Groq SDK type mismatch
       messages: [systemMessage, userMessage],
       model: "llama-3.2-11b-vision-preview",
       temperature: 0.5,
