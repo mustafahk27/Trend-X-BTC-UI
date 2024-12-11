@@ -12,11 +12,6 @@ interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
 }
 
-type PlaneArgs = [width: number, height: number];
-type RingArgs = [innerRadius: number, outerRadius: number, segments: number];
-type BoxArgs = [width: number, height: number, depth: number];
-type CylinderArgs = [radiusTop: number, radiusBottom: number, height: number, segments: number];
-
 export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinModelProps) {
   const mainRef = useRef<Group>(null);
   const bitcoinGold = '#F7931A';
@@ -91,7 +86,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           position={[0, 0, 0.1]} 
           rotation={[0, 0, (Math.PI * 2 / 4) * i]}
         >
-          <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64] satisfies RingArgs} />
+          <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64]} />
           <meshPhysicalMaterial 
             color={bitcoinGold}
             metalness={0.7}
@@ -117,7 +112,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
             ]}
             rotation={[0, 0, angle + Math.PI / 2]}
           >
-            <boxGeometry args={[0.1, 0.3, 0.05] satisfies BoxArgs} />
+            <boxGeometry args={[0.1, 0.3, 0.05]} />
             <meshPhysicalMaterial {...darkMaterial} />
           </mesh>
         );
@@ -144,7 +139,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           position={[0, 0, 0]} 
           rotation={[Math.PI / 2, 0, 0]}
         >
-          <cylinderGeometry args={[3, 3, 0.3, 64] satisfies CylinderArgs} />
+          <cylinderGeometry args={[3, 3, 0.3, 64]} />
           <meshPhysicalMaterial {...darkMaterial} />
         </mesh>
 
