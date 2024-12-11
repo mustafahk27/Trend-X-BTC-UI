@@ -294,7 +294,7 @@ export default function PredictionPage() {
                       </div>
                       <div className="space-y-2">
                         <p className="text-gray-400 mb-2">7-Day Forecast</p>
-                        {prediction?.dates?.map((day, index) => (
+                        {prediction?.dates?.map((day) => (
                           <div key={day.date} className="flex justify-between items-center py-2 border-b border-white/10">
                             <span className="text-gray-400">{day.date}</span>
                             <span className="text-[#F7931A] font-semibold">{day.price}</span>

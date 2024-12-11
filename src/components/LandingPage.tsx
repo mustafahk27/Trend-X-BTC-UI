@@ -73,7 +73,14 @@ extendThree({ HolographicMaterial })
 // Define custom element type
 interface CustomElements {
   holographicMaterial: Object3DNode<
-    THREE.ShaderMaterial,
+    THREE.ShaderMaterial & {
+      time: number;
+      color: THREE.Color;
+      freqX: number;
+      freqY: number;
+      freqZ: number;
+      amp: number;
+    },
     typeof HolographicMaterial
   >
 }

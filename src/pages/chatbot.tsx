@@ -13,7 +13,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { UserButton, useUser, UserResource } from "@clerk/nextjs";
 import { Sparkles } from "@react-three/drei";
-import FloatingBitcoins from "@/components/FloatingBitcoins";
 import { Wand2 } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
@@ -592,7 +591,6 @@ export default function ChatbotPage() {
   return (
     <div className="min-h-screen bg-black">
       {/* Background Elements */}
-      <FloatingBitcoins />
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />
       </div>

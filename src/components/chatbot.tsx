@@ -37,10 +37,7 @@ const Chatbot = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowCitations(prev => ({
-                  ...prev,
-                  [index]: !prev[index]
-                }))}
+                onClick={() => handleCitationClick(index)}
                 className="text-[#F7931A] hover:text-[#F7931A]/80"
               >
                 {showCitations[index] ? 'Hide Citations' : 'Show Citations'}
