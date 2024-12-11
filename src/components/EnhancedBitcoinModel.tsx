@@ -12,7 +12,7 @@ interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
 }
 
-type MaterialProps = Partial<typeof MeshPhysicalMaterial>;
+//type MaterialProps = Partial<typeof MeshPhysicalMaterial>;
 
 export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinModelProps) {
   const mainRef = useRef<Group>(null);
