@@ -7,24 +7,12 @@ import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader, Group, MeshPhysicalMaterial } from 'three';
-import type { ThreeElements } from '@react-three/fiber';
 
 interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
 }
 
-type MaterialProps = Partial<typeof MeshPhysicalMaterial> & {
-  map?: THREE.Texture;
-  color?: string;
-  emissive?: string | number;
-  emissiveIntensity?: number;
-  metalness?: number;
-  roughness?: number;
-  clearcoat?: number;
-  clearcoatRoughness?: number;
-  opacity?: number;
-  transparent?: boolean;
-};
+type MaterialProps = Partial<typeof MeshPhysicalMaterial>;
 
 export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinModelProps) {
   const mainRef = useRef<Group>(null);
@@ -78,7 +66,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
     <group position={position} rotation={rotation}>
       {/* Bitcoin Logo */}
       <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[2.8, 2.8]} />
+        <planeGeometry args={[2.8, 2.8] as [number, number]} />
         <meshPhysicalMaterial 
           map={bitcoinTexture}
           transparent
@@ -100,7 +88,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           position={[0, 0, 0.1]} 
           rotation={[0, 0, (Math.PI * 2 / 4) * i]}
         >
-          <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64]} />
+          <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64] as [number, number, number]} />
           <meshPhysicalMaterial 
             color={bitcoinGold}
             metalness={0.7}
@@ -126,8 +114,8 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
             ]}
             rotation={[0, 0, angle + Math.PI / 2]}
           >
-            <boxGeometry args={[0.1, 0.3, 0.05]} />
-            <meshPhysicalMaterial {...darkMaterial as MaterialProps} />
+            <boxGeometry args={[0.1, 0.3, 0.05] as [number, number, number]} />
+            <meshPhysicalMaterial {...darkMaterial} />
           </mesh>
         );
       })}
@@ -153,8 +141,8 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           position={[0, 0, 0]} 
           rotation={[Math.PI / 2, 0, 0]}
         >
-          <cylinderGeometry args={[3, 3, 0.3, 64]} />
-          <meshPhysicalMaterial {...darkMaterial as MaterialProps} />
+          <cylinderGeometry args={[3, 3, 0.3, 64] as [number, number, number, number]} />
+          <meshPhysicalMaterial {...darkMaterial} />
         </mesh>
 
         {/* Front side */}
@@ -170,8 +158,8 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
             rotation={[0, (i / 120) * Math.PI * 2, 0]} 
             position={[3, 0, 0]}
           >
-            <boxGeometry args={[0.05, 0.3, 0.05]} />
-            <meshPhysicalMaterial {...darkMaterial as MaterialProps} />
+            <boxGeometry args={[0.05, 0.3, 0.05] as [number, number, number]} />
+            <meshPhysicalMaterial {...darkMaterial} />
           </mesh>
         ))}
 
@@ -205,7 +193,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
               attenuation={(t) => t * t}
             >
               <mesh position={[3.5, 0, 0]}>
-                <sphereGeometry args={[0.1]} />
+                <sphereGeometry args={[0.1] as [number]} />
                 <meshPhysicalMaterial color={bitcoinGold} />
               </mesh>
             </Trail>
