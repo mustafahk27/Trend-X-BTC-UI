@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search, ChevronDown } from "lucide-react";
+import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search, ChevronDown, Users } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { Sparkles } from "@react-three/drei";
@@ -457,7 +457,7 @@ export default function ChatbotPage() {
     },
   ]);
   const [input, setInput] = useState('');
-  const [context, setContext] = useState('General Bitcoin Analysis');
+  const [context, setContext] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -650,8 +650,18 @@ export default function ChatbotPage() {
           label="Back" 
           className="!px-3 sm:!px-6 !py-2 sm:!py-5" 
         />
-        <NavButton href="/" icon={Home} label="Home" className="hidden sm:flex" />
-        <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" className="hidden sm:flex" />
+        <NavButton 
+          href="/dashboard" 
+          icon={BarChart2} 
+          label="Dashboard" 
+          className="hidden sm:flex" 
+        />
+        <NavButton 
+          href="/tech-team" 
+          icon={Users} 
+          label="Tech & Team" 
+          className="hidden sm:flex" 
+        />
       </div>
 
       {/* Model Selector */}
@@ -693,7 +703,6 @@ export default function ChatbotPage() {
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-4">
-                <span>Context: {context}</span>
                 <Link href="/prediction">
                   <Button 
                     variant="ghost"

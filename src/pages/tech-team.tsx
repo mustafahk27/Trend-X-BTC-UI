@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Brain, Database, Code, Layers, Clock } from "lucide-react";
 import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { NavButton } from "@/components/ui/nav-button";
+import { BarChart2, MessageSquare } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
 
 // Tech stack data
 const techStack = [
@@ -124,11 +130,38 @@ const dataSources = [
 ];
 
 export default function TechTeam() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-black">
       {/* Background Elements */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="fixed top-6 left-6 z-20 flex gap-4">
+        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
+        <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" />
+        <NavButton href="/chatbot" icon={MessageSquare} label="AI Chat" />
+      </div>
+
+      {/* User Button */}
+      <div className="fixed top-6 right-6 z-20">
+        <UserButton 
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: "w-10 h-10 rounded-full border-2 border-white/10 hover:border-[#F7931A]/50 transition-all",
+              userButtonPopover: "bg-black/90 border border-white/10 backdrop-blur-sm",
+              userButtonPopoverCard: "bg-transparent",
+              userButtonPopoverActions: "bg-transparent",
+              userButtonPopoverActionButton: "hover:bg-white/10",
+              userButtonPopoverActionButtonText: "text-white",
+              userButtonPopoverFooter: "hidden"
+            }
+          }}
+        />
       </div>
 
       {/* Main Content */}

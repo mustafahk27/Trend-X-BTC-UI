@@ -11,8 +11,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const isChatbotPage = router.pathname === '/chatbot';
   const isDashboardPage = router.pathname === '/dashboard';
   const isPredictionPage = router.pathname === '/prediction';
+  const isTechTeamPage = router.pathname === '/tech-team';
 
-  const shouldExcludeLayout = isAuthPage || isStartPage || isChatbotPage || isDashboardPage || isPredictionPage;
+  const shouldExcludeLayout = isAuthPage || isStartPage || isChatbotPage || isDashboardPage || isPredictionPage || isTechTeamPage;
 
   return (
     <ClerkProvider
