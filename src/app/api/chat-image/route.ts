@@ -1,16 +1,23 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
-// Define proper types for the API
-interface MessageContent {
-  type: string;
-  text?: string;
-  image_url?: {
-    url: string;
-  };
+// Define types that match Groq SDK requirements
+interface ImageURL {
+  url: string;
 }
 
-// Update types to match Groq SDK requirements
+interface ChatCompletionContentPartImage {
+  type: 'image_url';
+  image_url: ImageURL;
+}
+
+interface ChatCompletionContentPartText {
+  type: 'text';
+  text: string;
+}
+
+type ChatCompletionContentPart = ChatCompletionContentPartText | ChatCompletionContentPartImage;
+
 interface SystemMessage {
   role: 'system';
   content: string;
@@ -18,7 +25,7 @@ interface SystemMessage {
 
 interface UserMessage {
   role: 'user';
-  content: MessageContent[];
+  content: ChatCompletionContentPart[];
 }
 
 const apiKey = process.env.GROQ_API_KEY;
@@ -52,11 +59,12 @@ export async function POST(request: Request) {
     }
 
     const imageContent = latestMessage.content.find(
-      (item: MessageContent) => item.type === 'image_url'
-    );
+      (item: ChatCompletionContentPart) => item.type === 'image_url'
+    ) as ChatCompletionContentPartImage | undefined;
+    
     const textContent = latestMessage.content.find(
-      (item: MessageContent) => item.type === 'text'
-    );
+      (item: ChatCompletionContentPart) => item.type === 'text'
+    ) as ChatCompletionContentPartText | undefined;
 
     if (!imageContent?.image_url?.url) {
       throw new Error('No image provided');
@@ -120,4 +128,4 @@ export async function POST(request: Request) {
       { status: statusCode }
     );
   }
-} 
+}
