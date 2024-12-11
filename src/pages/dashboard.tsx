@@ -11,6 +11,9 @@ import { UserButton } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
 import { useEffect, useState, useCallback } from 'react';
 import { BitcoinChart } from "@/components/ui/chart";
+import { BinanceTicker } from "@/components/BinanceTicker";
+import { OrderFlowTicker } from "@/components/OrderFlowTicker";
+import { ActiveAddressesTicker } from "@/components/ActiveAddressesTicker";
 
 interface BTCMetrics {
   Date: string;
@@ -39,6 +42,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [activeAddressMetrics, setActiveAddressMetrics] = useState({
+    trend: 65,
+    isPositive: true
+  });
 
   const fetchMetrics = useCallback(async () => {
     setLoading(true);
@@ -149,8 +156,8 @@ export default function Dashboard() {
     
     // Set up intervals
     const intervals = [
-      setInterval(fetchCurrentPrice, 10000),  // Price every 10s
-      setInterval(fetchData, 60000)  // All data every minute
+      setInterval(fetchCurrentPrice, 10000),
+      setInterval(fetchData, 60000)
     ];
     
     return () => intervals.forEach(clearInterval);
@@ -161,7 +168,7 @@ export default function Dashboard() {
     {
       title: "Current Price",
       value: currentPrice ? `$${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...',
-      change: "+2.5%",
+//      change: "+2.5%",
       isPositive: true,
       icon: DollarSign,
     },
@@ -187,25 +194,6 @@ export default function Dashboard() {
       icon: Database,
     }
   ];
-
-  // Render loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
-        <div className="relative w-64 h-1 bg-white/10 rounded-full overflow-hidden">
-          <motion.div
-            className="absolute inset-y-0 left-0 bg-[#F7931A]"
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 2, ease: "easeInOut" }}
-          />
-        </div>
-        <div className="text-white text-lg font-semibold mt-4">
-          Loading metrics...
-        </div>
-      </div>
-    );
-  }
 
   // Render error state with retry option
   if (error) {
@@ -279,6 +267,11 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm text-gray-400">{stat.title}</p>
                     <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
+                    {stat.title === "Current Price" && (
+                      <div className="mt-2">
+                        <BinanceTicker />
+                      </div>
+                    )}
                     {stat.change && (
                       <div className={`flex items-center mt-2 ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
                         {stat.isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
@@ -348,15 +341,17 @@ export default function Dashboard() {
               {metrics && [
                 { 
                   metric: "Net Order Flow", 
-                  value: `$${metrics.net_order_flow.toLocaleString()}`, 
-                  trend: 92,
-                  isPositive: metrics.net_order_flow > 0
+                  value: <OrderFlowTicker />,
+                  trend: 65,
+                  isPositive: true 
                 },
                 { 
                   metric: "Active Addresses", 
-                  value: metrics.num_user_addresses.toLocaleString(), 
-                  trend: 87,
-                  isPositive: true 
+                  value: <ActiveAddressesTicker 
+                    onDataUpdate={setActiveAddressMetrics}
+                  />,
+                  trend: activeAddressMetrics.trend,
+                  isPositive: activeAddressMetrics.isPositive
                 }
               ].map((metric) => (
                 <div 
@@ -376,11 +371,6 @@ export default function Dashboard() {
                       }`}
                       style={{ width: `${metric.trend}%` }}
                     />
-                  </div>
-                  <div className="text-right mt-1">
-                    <span className="text-xs text-gray-400">
-                      {metric.trend}% of daily average
-                    </span>
                   </div>
                 </div>
               ))}
