@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 const Chatbot = () => {
   const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const [messages, setMessages] = React.useState([]);
+  const [messages] = React.useState([]);
   const [showCitations, setShowCitations] = React.useState({});
 
   const handleCitationClick = (index: number) => {

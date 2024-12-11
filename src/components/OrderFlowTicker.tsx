@@ -19,7 +19,7 @@ export function OrderFlowTicker() {
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@depth@100ms');
     let buyVolume = 0;
     let sellVolume = 0;
-    let maxFlow = 1000000;
+    const maxFlow = 1000000;
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);

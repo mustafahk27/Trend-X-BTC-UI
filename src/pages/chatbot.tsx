@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { RefreshCw, Send, ArrowLeft, Home, BarChart2, Check, Search, ChevronDown, Users } from "lucide-react";
 import Link from 'next/link';
+import Image from 'next/image';
 import { UserButton } from "@clerk/nextjs";
 import { Sparkles } from "@react-three/drei";
 import FloatingBitcoins from "@/components/FloatingBitcoins";
@@ -38,6 +39,15 @@ const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '
 type ChatMessage = {
   role: 'system' | 'user' | 'assistant';
   content: string;
+};
+
+type UserType = {
+  fullName?: string;
+  imageUrl?: string;
+  firstName?: string;
+  id?: string;
+  username?: string;
+  emailAddresses?: { emailAddress: string }[];
 };
 
 const MODEL_MAP: { [key: string]: string } = {
@@ -123,21 +133,6 @@ type TavilySearchResult = {
   title: string;
   content: string;
 };
-
-function LoadingBitcoin() {
-  return (
-    <mesh>
-      <cylinderGeometry args={[2, 2, 0.2, 32]} />
-      <meshStandardMaterial
-        color="#F7931A"
-        metalness={0.9}
-        roughness={0.1}
-        emissive="#F7931A"
-        emissiveIntensity={0.2}
-      />
-    </mesh>
-  );
-}
 
 const ModelSelector = ({ 
   selectedModel, 
@@ -226,17 +221,11 @@ const ModelSelector = ({
   );
 };
 
-// Add custom styles for markdown formatting
-const markdownStyles = {
-  heading: "text-xl font-bold mt-4 mb-2 text-[#F7931A]",
-  subheading: "text-lg font-semibold mt-3 mb-2 text-[#F7931A]/80",
-  paragraph: "mb-4 text-gray-200",
-  list: "mb-4 ml-4 space-y-2",
-  listItem: "text-gray-200",
-};
-
-// Update the message rendering in the ChatbotPage component
-function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMessage; user: any; index: number; isTyping: boolean }) {
+const ChatMessage = ({ message, user, isTyping }: { 
+  message: EnhancedMessage; 
+  user: UserType | null; 
+  isTyping: boolean 
+}) => {
   const [displayedContent, setDisplayedContent] = useState('');
   const citationRef = useRef<HTMLDivElement>(null);
   const [showCitation, setShowCitation] = useState(false);
@@ -312,10 +301,12 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
                   className="object-cover w-full h-full"
                 />
                 <AvatarFallback>
-                  <img 
+                  <Image 
                     src="/ai-avatar.png" 
                     alt="AI" 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-cover"
+                    width={40}
+                    height={40}
                   />
                 </AvatarFallback>
               </>
@@ -374,7 +365,7 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
                     em: ({ children }) => (
                       <em className="italic text-gray-300">{children}</em>
                     ),
-                    code: ({ inline, children, ...props }: Components['code']) => {
+                    code: ({ inline, className, children, ...props }: CodeProps) => {
                       return inline ? (
                         <code className="bg-black/30 rounded px-1 py-0.5 font-mono text-sm" {...props}>{children}</code>
                       ) : (
@@ -446,7 +437,14 @@ function ChatMessage({ message, user, index, isTyping }: { message: EnhancedMess
       </div>
     </motion.div>
   );
-}
+};
+
+// Update the code component type
+type CodeProps = {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+} & React.HTMLAttributes<HTMLElement>;
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<EnhancedMessage[]>([
@@ -460,6 +458,7 @@ export default function ChatbotPage() {
   const [context, setContext] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const { user } = useUser();
@@ -746,7 +745,6 @@ export default function ChatbotPage() {
                 key={index} 
                 message={message} 
                 user={user}
-                index={index}
                 isTyping={isTyping}
               />
             ))}
@@ -763,10 +761,12 @@ export default function ChatbotPage() {
                     className="object-cover w-full h-full"
                   />
                   <AvatarFallback>
-                    <img 
+                    <Image 
                       src="/ai-avatar.png" 
                       alt="AI" 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover"
+                      width={40}
+                      height={40}
                     />
                   </AvatarFallback>
                 </Avatar>
@@ -790,7 +790,7 @@ export default function ChatbotPage() {
                     className="object-cover w-full h-full"
                   />
                   <AvatarFallback>
-                    <img 
+                    <Image 
                       src="/ai-avatar.png" 
                       alt="AI" 
                       className="w-full h-full object-cover" 

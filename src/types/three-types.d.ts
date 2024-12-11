@@ -9,6 +9,19 @@ import {
   Material,
   Object3D
 } from 'three'
+import { 
+  OrbitControls as OrbitControlsImpl,
+  Sparkles as SparklesImpl,
+  Float as FloatImpl,
+  Environment as EnvironmentImpl
+} from '@react-three/drei'
+import { 
+  EffectComposer as EffectComposerImpl,
+  Bloom as BloomImpl,
+  ChromaticAberration as ChromaticAberrationImpl
+} from '@react-three/postprocessing'
+import { Canvas as CanvasImpl } from '@react-three/fiber'
+import { Suspense as SuspenseImpl } from 'react'
 
 declare global {
   namespace JSX {
@@ -18,33 +31,27 @@ declare global {
       spotLight: Object3DNode<SpotLight, typeof SpotLight>
       pointLight: Object3DNode<PointLight, typeof PointLight>
       ambientLight: Object3DNode<AmbientLight, typeof AmbientLight>
-      primitive: Object3DNode<Object3D, any>
-      sphereGeometry: Object3DNode<BufferGeometry, any>
-      boxGeometry: Object3DNode<BufferGeometry, any>
-      cylinderGeometry: Object3DNode<BufferGeometry, any>
-      ringGeometry: Object3DNode<BufferGeometry, any>
-      planeGeometry: Object3DNode<BufferGeometry, any>
-      meshBasicMaterial: Object3DNode<Material, any>
-      meshStandardMaterial: Object3DNode<Material, any>
-      meshPhysicalMaterial: Object3DNode<Material, any>
-      points: Object3DNode<Object3D, any>
-      pointMaterial: Object3DNode<Material, any>
-      // Add React Three Fiber components
-      'pointLight': any
-      'ambientLight': any
-      'spotLight': any
-      'mesh': any
-      'primitive': any
-      'points': any
-      'Canvas': any
-      'OrbitControls': any
-      'Sparkles': any
-      'Float': any
-      'Environment': any
-      'EffectComposer': any
-      'Bloom': any
-      'ChromaticAberration': any
-      'Suspense': any
+      primitive: Object3DNode<Object3D, typeof Object3D>
+      sphereGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      boxGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      cylinderGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      ringGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      planeGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      meshBasicMaterial: Object3DNode<Material, typeof Material>
+      meshStandardMaterial: Object3DNode<Material, typeof Material>
+      meshPhysicalMaterial: Object3DNode<Material, typeof Material>
+      points: Object3DNode<Object3D, typeof Object3D>
+      pointMaterial: Object3DNode<Material, typeof Material>
+      // React Three Fiber components
+      'Canvas': typeof CanvasImpl
+      'OrbitControls': typeof OrbitControlsImpl
+      'Sparkles': typeof SparklesImpl
+      'Float': typeof FloatImpl
+      'Environment': typeof EnvironmentImpl
+      'EffectComposer': typeof EffectComposerImpl
+      'Bloom': typeof BloomImpl
+      'ChromaticAberration': typeof ChromaticAberrationImpl
+      'Suspense': typeof SuspenseImpl
     }
   }
 } 
