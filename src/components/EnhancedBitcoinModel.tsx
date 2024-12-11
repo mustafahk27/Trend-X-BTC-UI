@@ -1,12 +1,12 @@
 'use client'
 
-import { useRef, useEffect } from 'react';
-import { Group } from 'three';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Float, Sparkles, Trail } from '@react-three/drei';
 import { useSpring, animated } from '@react-spring/three';
+import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { TextureLoader, Group } from 'three';
 
 interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
@@ -23,32 +23,20 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
     config: { mass: 1, tension: 120, friction: 14 }
   });
 
-  useEffect(() => {
-    let animationFrameId: number;
-
-    const animate = () => {
-      const time = Date.now() * 0.001;
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    
+    if (mainRef.current) {
+      mainRef.current.position.y = Math.sin(time * 0.3) * 0.15;
       
-      if (mainRef.current) {
-        mainRef.current.position.y = Math.sin(time * 0.3) * 0.15;
-        
-        if (isPredicting) {
-          mainRef.current.rotation.y += 0.015;
-        } else {
-          mainRef.current.rotation.y = Math.sin(time * 0.2) * 0.1;
-        }
+      if (isPredicting) {
+        mainRef.current.rotation.y += 0.015;
+        mainRef.current.rotation.z = Math.sin(time * 0.5) * 0.1;
+      } else {
+        mainRef.current.rotation.y += 0.003;
       }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-    return () => {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, [isPredicting]);
+    }
+  });
 
   const commonMaterial = {
     color: bitcoinGold,
