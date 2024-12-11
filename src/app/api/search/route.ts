@@ -9,6 +9,13 @@ type Citation = {
   snippet: string;
 };
 
+// Add the interface for search result
+interface SearchResult {
+  url: string;
+  title: string;
+  content: string;
+}
+
 const SYSTEM_PROMPT = `You are a crypto market researcher providing technical data analysis for academic research purposes.
 
 IMPORTANT: First analyze the real-time market data provided, then combine it with the search results to give accurate, up-to-date information.
@@ -206,7 +213,7 @@ ${topCoinsData
     const results = searchData.results || [];
     
     // Format search results for citations
-    const citations: Citation[] = results.map((result: any, index: number) => ({
+    const citations: Citation[] = results.map((result: SearchResult, index: number) => ({
       id: index + 1,
       url: result.url,
       title: result.title,

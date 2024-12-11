@@ -87,7 +87,7 @@ interface CustomElements {
 
 // Extend JSX.IntrinsicElements
 declare module '@react-three/fiber' {
-  interface ThreeElements extends CustomElements {}
+  type ThreeElements = CustomElements;
 }
 
 function ParticleRing({ radius = 2, count = 80 }) {

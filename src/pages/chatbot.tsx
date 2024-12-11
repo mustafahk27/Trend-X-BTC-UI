@@ -8,19 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { RefreshCw, Send, ArrowLeft, BarChart2, Check, Search, ChevronDown, Users } from "lucide-react";
+import { RefreshCw, Send, ArrowLeft, BarChart2, Search, ChevronDown, Users } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
 import { UserButton, useUser, UserResource } from "@clerk/nextjs";
-import { Sparkles } from "@react-three/drei";
 import { Wand2 } from "lucide-react";
-import { Canvas } from "@react-three/fiber";
-import { Suspense } from "react";
 import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
 import Groq from 'groq-sdk';
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import { tavily } from "@tavily/core";
 
 // Initialize clients with browser safety flag
 const groq = new Groq({
@@ -28,12 +23,11 @@ const groq = new Groq({
   dangerouslyAllowBrowser: true
 });
 
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
-
-// Initialize Tavily client outside the component
+// Note: These APIs are prepared for future use in advanced features
+/* const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
 const tvly = tavily({ 
   apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
-});
+}); */
 
 type UserType = UserResource | null;
 
@@ -99,12 +93,12 @@ const modelCategories: ModelCategory[] = [
   }
 ];
 
-// Define Tavily types since they're not exported
-type TavilySearchResult = {
+// Note: This type is used for API response handling
+/* type TavilySearchResult = {
   url: string;
   title: string;
   content: string;
-};
+}; */
 
 const ModelSelector = ({ 
   selectedModel, 
@@ -192,6 +186,13 @@ const ModelSelector = ({
     </div>
   );
 };
+
+// Note: This type is used for markdown code block rendering
+interface CodeProps extends React.HTMLAttributes<HTMLElement> {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
 
 const ChatMessage = ({ message, user, isTyping }: { 
   message: EnhancedMessage; 
@@ -413,13 +414,6 @@ const ChatMessage = ({ message, user, isTyping }: {
     </motion.div>
   );
 };
-
-// Update the code component type
-type CodeProps = {
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-} & React.HTMLAttributes<HTMLElement>;
 
 export default function ChatbotPage() {
   const [messages, setMessages] = useState<EnhancedMessage[]>([
