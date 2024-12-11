@@ -6,13 +6,12 @@ import { Float, Sparkles, Trail } from '@react-three/drei';
 import { useSpring, animated } from '@react-spring/three';
 import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
-import { TextureLoader, Group, MeshPhysicalMaterial } from 'three';
+import { TextureLoader, Group } from 'three';
+import type { MaterialProps } from '@react-three/fiber';
 
 interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
 }
-
-//type MaterialProps = Partial<typeof MeshPhysicalMaterial>;
 
 export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinModelProps) {
   const mainRef = useRef<Group>(null);
@@ -68,6 +67,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[2.8, 2.8] as [number, number]} />
         <meshPhysicalMaterial 
+          attach="material"
           map={bitcoinTexture}
           transparent
           color={bitcoinGold}
@@ -90,6 +90,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
         >
           <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64] as [number, number, number]} />
           <meshPhysicalMaterial 
+            attach="material"
             color={bitcoinGold}
             metalness={0.7}
             roughness={0.4}
@@ -159,7 +160,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
             position={[3, 0, 0]}
           >
             <boxGeometry args={[0.05, 0.3, 0.05] as [number, number, number]} />
-            <meshPhysicalMaterial {...darkMaterial} />
+            <meshPhysicalMaterial {...darkMaterial} attach="material" />
           </mesh>
         ))}
 
