@@ -187,13 +187,6 @@ const ModelSelector = ({
   );
 };
 
-// Note: This type is used for markdown code block rendering
-interface CodeProps extends React.HTMLAttributes<HTMLElement> {
-  inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-}
-
 const ChatMessage = ({ message, user, isTyping }: { 
   message: EnhancedMessage; 
   user: UserType | null; 
