@@ -15,11 +15,6 @@ interface ChatMessage {
   content: string | MessageContent[];
 }
 
-interface ErrorResponse {
-  message: string;
-  status: number;
-}
-
 const apiKey = process.env.GROQ_API_KEY;
 
 if (!apiKey) {
@@ -87,7 +82,8 @@ export async function POST(request: Request) {
     };
 
     const completion = await groq.chat.completions.create({
-      messages: [systemMessage, userMessage] as any, // Type assertion needed for Groq SDK compatibility
+      // @ts-expect-error - Groq SDK type mismatch
+      messages: [systemMessage, userMessage],
       model: "llama-3.2-11b-vision-preview",
       temperature: 0.5,
       max_tokens: 8192,
