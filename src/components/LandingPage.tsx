@@ -87,7 +87,19 @@ interface CustomElements {
 
 // Extend JSX.IntrinsicElements
 declare module '@react-three/fiber' {
-  type ThreeElements = CustomElements;
+  interface ThreeElements {
+    holographicMaterial: Object3DNode<
+      THREE.ShaderMaterial & {
+        time: number;
+        color: THREE.Color;
+        freqX: number;
+        freqY: number;
+        freqZ: number;
+        amp: number;
+      },
+      typeof HolographicMaterial
+    >
+  }
 }
 
 function ParticleRing({ radius = 2, count = 80 }) {
