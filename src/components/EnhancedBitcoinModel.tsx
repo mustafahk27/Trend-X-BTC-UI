@@ -66,7 +66,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
     <group position={position} rotation={rotation}>
       {/* Bitcoin Logo */}
       <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[2.8, 2.8, 1, 1]} />
+        <planeGeometry args={[2.8, 2.8]} />
         <meshPhysicalMaterial 
           {...{
             map: bitcoinTexture,
