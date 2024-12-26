@@ -92,15 +92,10 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
         >
           <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64]} />
           <meshPhysicalMaterial 
-            {...{
-              color: bitcoinGold,
-              metalness: 0.7,
-              roughness: 0.4,
-              emissive: bitcoinGold,
-              emissiveIntensity: 0.6 - (i * 0.1),
-              transparent: true,
-              opacity: 0.4 - (i * 0.05)
-            } as MeshPhysicalMaterialProps}
+            {...commonMaterial}
+            emissiveIntensity={0.6 - (i * 0.1)}
+            opacity={0.4 - (i * 0.05)}
+            transparent
           />
         </mesh>
       ))}

@@ -58,9 +58,17 @@ declare global {
 
 declare module '@react-three/fiber' {
   interface ThreeElements {
-    planeGeometry: Object3DNode<THREE.PlaneGeometry, typeof THREE.PlaneGeometry>
-    ringGeometry: Object3DNode<THREE.RingGeometry, typeof THREE.RingGeometry>
-    boxGeometry: Object3DNode<THREE.BoxGeometry, typeof THREE.BoxGeometry>
-    cylinderGeometry: Object3DNode<THREE.CylinderGeometry, typeof THREE.CylinderGeometry>
+    planeGeometry: JSX.IntrinsicElements['planeGeometry'] & {
+      args?: [width?: number, height?: number, widthSegments?: number, heightSegments?: number]
+    }
+    ringGeometry: JSX.IntrinsicElements['ringGeometry'] & {
+      args?: [innerRadius?: number, outerRadius?: number, thetaSegments?: number]
+    }
+    boxGeometry: JSX.IntrinsicElements['boxGeometry'] & {
+      args?: [width?: number, height?: number, depth?: number]
+    }
+    cylinderGeometry: JSX.IntrinsicElements['cylinderGeometry'] & {
+      args?: [radiusTop?: number, radiusBottom?: number, height?: number, radialSegments?: number]
+    }
   }
 } 
