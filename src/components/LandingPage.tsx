@@ -133,7 +133,7 @@ function ParticleRing({ radius = 2, count = 80 }) {
       {points.map((point, i) => (
         <mesh key={i} position={point}>
           <sphereGeometry args={[0.02, 16, 16]} />
-          <meshBasicMaterial color="#F7931A" transparent opacity={0.6} />
+          <meshBasicMaterial color="#F7931A" transparent={true} opacity={0.6} />
         </mesh>
       ))}
     </group>

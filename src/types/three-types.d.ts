@@ -50,7 +50,9 @@ declare global {
       planeGeometry: Object3DNode<THREE.PlaneGeometry, typeof THREE.PlaneGeometry> & {
         args: readonly [width: number, height: number] | readonly [width: number, height: number, widthSegments: number, heightSegments: number]
       }
-      meshBasicMaterial: Object3DNode<Material, typeof Material>
+      meshBasicMaterial: Object3DNode<THREE.MeshBasicMaterial, typeof THREE.MeshBasicMaterial> & {
+        args?: [THREE.MeshBasicMaterialParameters]
+      }
       meshStandardMaterial: Object3DNode<Material, typeof Material>
       meshPhysicalMaterial: Object3DNode<MeshPhysicalMaterial, typeof MeshPhysicalMaterial> & {
         args?: [MeshPhysicalMaterialParameters] | []
@@ -90,6 +92,9 @@ declare module '@react-three/fiber' {
     }
     sphereGeometry: JSX.IntrinsicElements['sphereGeometry'] & {
       args?: [radius?: number, widthSegments?: number, heightSegments?: number]
+    }
+    meshBasicMaterial: JSX.IntrinsicElements['meshBasicMaterial'] & {
+      args?: [THREE.MeshBasicMaterialParameters]
     }
   }
 } 
