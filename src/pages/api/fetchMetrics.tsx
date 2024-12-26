@@ -1,10 +1,10 @@
 // pages/api/fetchMetrics.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import storage from '@/config/firebaseConfig';
+import { storage } from '@/config/firebaseConfig';
 import { ref, getDownloadURL } from 'firebase/storage';
 import Papa from 'papaparse';
 
-console.log('Storage Initialized:', storage); // Add this line  
+console.log('Storage Initialized:', storage);
 
 interface BTCMetrics {
   Date: string;
