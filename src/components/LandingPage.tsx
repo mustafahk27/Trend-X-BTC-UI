@@ -168,7 +168,7 @@ function CoinEdgeDetail() {
       {Array.from({ length: 120 }).map((_, i) => (
         <mesh key={i} rotation={[0, (i / 120) * Math.PI * 2, 0]} position={[3, 0, 0]}>
           <boxGeometry args={[0.05, 0.3, 0.05]} />
-          <meshStandardMaterial color="#F7931A" metalness={0.9} roughness={0.3} />
+          <meshStandardMaterial attach="material" args={undefined} />
         </mesh>
       ))}
     </group>
@@ -470,6 +470,8 @@ function EnhancedScene() {
           />
           <ChromaticAberration
             offset={new Vector2(0.001, 0.001)}
+            radialModulation={false}
+            modulationOffset={0.0}
           />
         </EffectComposer>
 
