@@ -19,7 +19,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Storage
-const firebaseStorage: FirebaseStorage = getStorage(app);
+const firebaseStorage = getStorage(app);
 
 // Only initialize analytics on client side
 let analytics: Analytics | null = null;
@@ -27,4 +27,4 @@ if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
 }
 
-export { firebaseStorage as storage, analytics }; 
+export default firebaseStorage; 

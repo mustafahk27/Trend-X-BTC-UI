@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { storage } from '@/config/firebaseConfig';
+import storage from '@/config/firebaseConfig';
 import { getDownloadURL, ref } from 'firebase/storage';
 import Papa from 'papaparse';
 
