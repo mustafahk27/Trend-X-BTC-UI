@@ -5,6 +5,8 @@ import { storage } from '@/config/firebaseConfig';
 import { ref, getDownloadURL } from 'firebase/storage';
 import Papa from 'papaparse';
 
+console.log('Storage initialized:', storage);
+
 interface BTCMetrics {
   Date: string;
   Open: number;

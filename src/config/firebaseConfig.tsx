@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, Analytics } from "firebase/analytics";
 import { getStorage } from "firebase/storage"; // Import Firebase Storage
 
 // Your web app's Firebase configuration
@@ -20,9 +20,9 @@ const app = initializeApp(firebaseConfig);
 const storage = getStorage(app); // Initialize Firebase Storage
 
 // Only initialize analytics on client side
-let analytics = null;
+let analytics: Analytics | null = null;
 if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
 }
 
-export { app, analytics, storage }; // Export the app, analytics, and storage instances 
+export { storage, analytics }; // Export the storage and analytics instances 
