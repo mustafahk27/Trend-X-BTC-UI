@@ -7,7 +7,9 @@ import {
   AmbientLight,
   BufferGeometry,
   Material,
-  Object3D
+  Object3D,
+  MeshPhysicalMaterial,
+  MeshPhysicalMaterialParameters
 } from 'three'
 import { 
   OrbitControls as OrbitControlsImpl,
@@ -48,7 +50,9 @@ declare global {
       }
       meshBasicMaterial: Object3DNode<Material, typeof Material>
       meshStandardMaterial: Object3DNode<Material, typeof Material>
-      meshPhysicalMaterial: Object3DNode<Material, typeof Material>
+      meshPhysicalMaterial: Object3DNode<MeshPhysicalMaterial, typeof MeshPhysicalMaterial> & {
+        args?: [MeshPhysicalMaterialParameters] | []
+      }
       points: Object3DNode<Object3D, typeof Object3D>
       pointMaterial: Object3DNode<Material, typeof Material>
       // React Three Fiber components
@@ -78,6 +82,9 @@ declare module '@react-three/fiber' {
     }
     cylinderGeometry: JSX.IntrinsicElements['cylinderGeometry'] & {
       args?: [radiusTop?: number, radiusBottom?: number, height?: number, radialSegments?: number]
+    }
+    meshPhysicalMaterial: JSX.IntrinsicElements['meshPhysicalMaterial'] & {
+      args?: [MeshPhysicalMaterialParameters] | []
     }
   }
 } 

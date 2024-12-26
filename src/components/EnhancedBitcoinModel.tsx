@@ -67,19 +67,17 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
       {/* Bitcoin Logo */}
       <mesh position={[0, 0, 0]}>
         <planeGeometry args={[2.8, 2.8] as const} />
-        <meshPhysicalMaterial 
-          {...{
-            map: bitcoinTexture,
-            transparent: true,
-            color: bitcoinGold,
-            emissive: bitcoinGold,
-            emissiveIntensity: isPredicting ? 0.6 : 0.3,
-            metalness: 0.6,
-            roughness: 0.4,
-            clearcoat: 0.3,
-            clearcoatRoughness: 0.4,
-            opacity: 0.9
-          } as MeshPhysicalMaterialProps}
+        <meshPhysicalMaterial
+          map={bitcoinTexture}
+          transparent
+          color={bitcoinGold}
+          emissive={bitcoinGold}
+          emissiveIntensity={isPredicting ? 0.6 : 0.3}
+          metalness={0.6}
+          roughness={0.4}
+          clearcoat={0.3}
+          clearcoatRoughness={0.4}
+          opacity={0.9}
         />
       </mesh>
 
@@ -91,7 +89,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           rotation={[0, 0, (Math.PI * 2 / 4) * i]}
         >
           <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64] as const} />
-          <meshPhysicalMaterial 
+          <meshPhysicalMaterial
             {...commonMaterial}
             emissiveIntensity={0.6 - (i * 0.1)}
             opacity={0.4 - (i * 0.05)}
