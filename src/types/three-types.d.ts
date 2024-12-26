@@ -22,6 +22,7 @@ import {
 } from '@react-three/postprocessing'
 import { Canvas as CanvasImpl } from '@react-three/fiber'
 import { Suspense as SuspenseImpl } from 'react'
+import * as THREE from 'three'
 
 declare global {
   namespace JSX {
@@ -33,10 +34,18 @@ declare global {
       ambientLight: Object3DNode<AmbientLight, typeof AmbientLight>
       primitive: Object3DNode<Object3D, typeof Object3D>
       sphereGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
-      boxGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
-      cylinderGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
-      ringGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
-      planeGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      boxGeometry: Object3DNode<THREE.BoxGeometry, typeof THREE.BoxGeometry> & {
+        args: readonly [width: number, height: number, depth: number]
+      }
+      cylinderGeometry: Object3DNode<THREE.CylinderGeometry, typeof THREE.CylinderGeometry> & {
+        args: readonly [radiusTop: number, radiusBottom: number, height: number, radialSegments: number]
+      }
+      ringGeometry: Object3DNode<THREE.RingGeometry, typeof THREE.RingGeometry> & {
+        args: readonly [innerRadius: number, outerRadius: number, segments: number]
+      }
+      planeGeometry: Object3DNode<THREE.PlaneGeometry, typeof THREE.PlaneGeometry> & {
+        args: readonly [width: number, height: number] | readonly [width: number, height: number, widthSegments: number, heightSegments: number]
+      }
       meshBasicMaterial: Object3DNode<Material, typeof Material>
       meshStandardMaterial: Object3DNode<Material, typeof Material>
       meshPhysicalMaterial: Object3DNode<Material, typeof Material>
