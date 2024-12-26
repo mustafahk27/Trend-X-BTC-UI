@@ -9,8 +9,6 @@ import * as THREE from 'three';
 import { useLoader } from '@react-three/fiber';
 import { TextureLoader, Group } from 'three';
 import type { MeshPhysicalMaterialProps } from '@react-three/fiber';
-import { PlaneGeometryProps } from '@react-three/fiber';
-import { BufferGeometry, NormalBufferAttributes } from 'three';
 
 interface EnhancedBitcoinModelProps {
   isPredicting?: boolean;
@@ -68,7 +66,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
     <group position={position} rotation={rotation}>
       {/* Bitcoin Logo */}
       <mesh position={[0, 0, 0]}>
-        <planeGeometry args={[2.8, 2.8]} />
+        <planeGeometry args={[2.8, 2.8] as [number, number]} />
         <meshPhysicalMaterial 
           {...{
             map: bitcoinTexture,
@@ -92,7 +90,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           position={[0, 0, 0.1]} 
           rotation={[0, 0, (Math.PI * 2 / 4) * i]}
         >
-          <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64]} />
+          <ringGeometry args={[2.2 + i * 0.2, 2.3 + i * 0.2, 64] as [number, number, number]} />
           <meshPhysicalMaterial 
             {...{
               color: bitcoinGold,
@@ -120,7 +118,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
             ]}
             rotation={[0, 0, angle + Math.PI / 2]}
           >
-            <boxGeometry args={[0.1, 0.3, 0.05]} />
+            <boxGeometry args={[0.1, 0.3, 0.05] as [number, number, number]} />
             <meshPhysicalMaterial {...darkMaterial} />
           </mesh>
         );
@@ -147,7 +145,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
           position={[0, 0, 0]} 
           rotation={[Math.PI / 2, 0, 0]}
         >
-          <cylinderGeometry args={[3, 3, 0.3, 64]} />
+          <cylinderGeometry args={[3, 3, 0.3, 64] as [number, number, number, number]} />
           <meshPhysicalMaterial {...darkMaterial} />
         </mesh>
 
