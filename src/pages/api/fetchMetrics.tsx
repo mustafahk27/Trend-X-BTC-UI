@@ -4,7 +4,7 @@ import { storage } from '@/config/firebaseConfig';
 import { ref, getDownloadURL } from 'firebase/storage';
 import Papa from 'papaparse';
 
-console.log('Storage initialized:', storage);
+console.log('Storage Initialized:', storage); // Add this line  
 
 interface BTCMetrics {
   Date: string;
