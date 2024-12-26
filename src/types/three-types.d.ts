@@ -55,3 +55,12 @@ declare global {
     }
   }
 } 
+
+declare module '@react-three/fiber' {
+  interface ThreeElements {
+    planeGeometry: Object3DNode<THREE.PlaneGeometry, typeof THREE.PlaneGeometry>
+    ringGeometry: Object3DNode<THREE.RingGeometry, typeof THREE.RingGeometry>
+    boxGeometry: Object3DNode<THREE.BoxGeometry, typeof THREE.BoxGeometry>
+    cylinderGeometry: Object3DNode<THREE.CylinderGeometry, typeof THREE.CylinderGeometry>
+  }
+} 
