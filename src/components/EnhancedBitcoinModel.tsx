@@ -190,7 +190,7 @@ export function EnhancedBitcoinModel({ isPredicting = false }: EnhancedBitcoinMo
               attenuation={(t) => t * t}
             >
               <mesh position={[3.5, 0, 0]}>
-                <sphereGeometry args={[0.1]} />
+                <sphereGeometry args={[0.1, 32, 32]} />
                 <meshPhysicalMaterial color={bitcoinGold} />
               </mesh>
             </Trail>

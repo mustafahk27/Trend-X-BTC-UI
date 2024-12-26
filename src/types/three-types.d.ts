@@ -35,7 +35,9 @@ declare global {
       pointLight: Object3DNode<PointLight, typeof PointLight>
       ambientLight: Object3DNode<AmbientLight, typeof AmbientLight>
       primitive: Object3DNode<Object3D, typeof Object3D>
-      sphereGeometry: Object3DNode<BufferGeometry, typeof BufferGeometry>
+      sphereGeometry: Object3DNode<THREE.SphereGeometry, typeof THREE.SphereGeometry> & {
+        args?: [radius?: number, widthSegments?: number, heightSegments?: number]
+      }
       boxGeometry: Object3DNode<THREE.BoxGeometry, typeof THREE.BoxGeometry> & {
         args: readonly [width: number, height: number, depth: number]
       }
@@ -85,6 +87,9 @@ declare module '@react-three/fiber' {
     }
     meshPhysicalMaterial: JSX.IntrinsicElements['meshPhysicalMaterial'] & {
       args?: [MeshPhysicalMaterialParameters] | []
+    }
+    sphereGeometry: JSX.IntrinsicElements['sphereGeometry'] & {
+      args?: [radius?: number, widthSegments?: number, heightSegments?: number]
     }
   }
 } 
