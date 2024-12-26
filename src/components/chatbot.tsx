@@ -2,10 +2,21 @@ import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
+// Define the type for your state
+type CitationState = {
+  [key: number]: boolean;
+};
+
+// Define the type for a message
+type Message = {
+  isUser: boolean;
+  citations?: { url: string; title: string; snippet: string }[];
+};
+
 const Chatbot = () => {
   const citationRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
-  const [messages] = React.useState([]);
-  const [showCitations, setShowCitations] = React.useState({});
+  const [messages] = React.useState<Message[]>([]);
+  const [showCitations, setShowCitations] = React.useState<CitationState>({});
 
   const handleCitationClick = (index: number) => {
     setShowCitations(prev => {
@@ -32,7 +43,7 @@ const Chatbot = () => {
       {messages.map((message, index) => (
         <div key={index} className="mb-4">
           {/* Your existing message rendering code */}
-          {!message.isUser && message.citations && message.citations.length > 0 && (
+          {message.citations && message.citations.length > 0 && (
             <div className="mt-2 ml-12">
               <Button
                 variant="ghost"
@@ -50,7 +61,7 @@ const Chatbot = () => {
                   exit={{ opacity: 0, height: 0 }}
                   className="mt-2 space-y-2"
                 >
-                  {message.citations.map((citation, citIndex) => (
+                  {message.citations?.map((citation, citIndex) => (
                     <div
                       key={citIndex}
                       className="p-2 rounded bg-white/5 border border-white/10"
