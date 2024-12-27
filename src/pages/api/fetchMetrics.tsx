@@ -1,6 +1,7 @@
+// fetchMetrics.tsx
+
 import type { NextApiRequest, NextApiResponse } from "next";
-import firebaseStorage from "@/config/firebaseConfig";
-import { ref, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import Papa from "papaparse";
 
 interface BTCMetrics {
@@ -17,8 +18,10 @@ interface BTCMetrics {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // Ensure the 'ref' function uses the initialized storage instance
-    const metricsRef = ref(firebaseStorage, "data/cleaned_data.csv");
+    // Get the Firebase Storage instance
+    const storage = getStorage(); 
+
+    const metricsRef = ref(storage, "data/cleaned_data.csv");
     const downloadURL = await getDownloadURL(metricsRef);
 
     const response = await fetch(downloadURL);
@@ -51,9 +54,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       lastUpdated: latestData.Date,
     });
   } catch (error) {
-    console.error("Error in fetchMetrics:", error);
+    console.error("Error in fetch metrics:", error);
     res.status(500).json({
-      error: error instanceof Error ? error.message : "Internal Server Error",
+      error: 'Failed to fetch metrics',
     });
   }
 }
