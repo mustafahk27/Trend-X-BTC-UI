@@ -1,10 +1,10 @@
 // pages/api/fetchMetrics.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import storage from '@/config/firebaseConfig';
+import firebaseStorage from '@/config/firebaseConfig';
 import { ref, getDownloadURL } from 'firebase/storage';
 import Papa from 'papaparse';
 
-console.log('Storage Initialized:', storage);
+console.log('Storage Initialized:', firebaseStorage);
 
 interface BTCMetrics {
   Date: string;
@@ -20,7 +20,7 @@ interface BTCMetrics {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const metricsRef = ref(storage, 'data/cleaned_data.csv');
+    const metricsRef = ref(firebaseStorage, 'data/cleaned_data.csv');
     const downloadURL = await getDownloadURL(metricsRef);
     
     const response = await fetch(downloadURL);

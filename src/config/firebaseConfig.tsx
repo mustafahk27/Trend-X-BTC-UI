@@ -27,4 +27,4 @@ if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
 }
 
-export default firebaseStorage; 
+export default firebaseStorage;
