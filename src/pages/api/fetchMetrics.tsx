@@ -1,17 +1,14 @@
-// pages/api/fetchMetrics.ts
-import type { NextApiRequest, NextApiResponse } from 'next';
-import firebaseStorage from '@/config/firebaseConfig';
-import { ref, getDownloadURL } from 'firebase/storage';
-import Papa from 'papaparse';
-
-console.log('Storage Initialized:', firebaseStorage);
+import type { NextApiRequest, NextApiResponse } from "next";
+import firebaseStorage from "@/config/firebaseConfig";
+import { ref, getDownloadURL } from "firebase/storage";
+import Papa from "papaparse";
 
 interface BTCMetrics {
   Date: string;
   Open: number;
   High: number;
   Volume: number;
-  'Number of trades': number;
+  "Number of trades": number;
   avg_block_size: number;
   value: number;
   net_order_flow: number;
@@ -20,12 +17,13 @@ interface BTCMetrics {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const metricsRef = ref(firebaseStorage, 'data/cleaned_data.csv');
+    // Ensure the 'ref' function uses the initialized storage instance
+    const metricsRef = ref(firebaseStorage, "data/cleaned_data.csv");
     const downloadURL = await getDownloadURL(metricsRef);
-    
+
     const response = await fetch(downloadURL);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Failed to fetch file. HTTP status: ${response.status}`);
     }
 
     const csvText = await response.text();
@@ -36,44 +34,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (parsed.errors.length > 0) {
-      console.error('PapaParse Errors:', parsed.errors);
-      throw new Error('Error parsing CSV data');
+      throw new Error("Error parsing CSV data.");
     }
 
     const data = parsed.data;
-    if (data.length === 0) {
-      throw new Error('No data found in CSV');
-    }
-
-    // Get the latest row and verify its timestamp
     const latestData = data[data.length - 1];
-    const latestTimestamp = new Date(latestData.Date);
-    const currentTime = new Date();
-    const timeDifference = currentTime.getTime() - latestTimestamp.getTime();
-    const hoursDifference = timeDifference / (1000 * 60 * 60);
-
-    // If data is more than 1 hour old, send warning
-    if (hoursDifference > 1) {
-      console.warn(`Data might be stale. Latest entry is ${hoursDifference.toFixed(1)} hours old`);
-    }
-
-    // Get historical data
     const historicalData = data.slice(-48);
-    
-    res.status(200).json({ 
+
+    res.status(200).json({
       metrics: latestData,
-      historical: historicalData.map(entry => ({
+      historical: historicalData.map((entry) => ({
         time: new Date(entry.Date).toLocaleTimeString(),
         price: entry.Open,
-        timestamp: new Date(entry.Date).getTime()
+        timestamp: new Date(entry.Date).getTime(),
       })),
-      lastUpdated: latestTimestamp.toISOString(),
-      isStale: hoursDifference > 1
+      lastUpdated: latestData.Date,
     });
-  } catch (error: Error | unknown) {
-    console.error('API Error:', error);
-    res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'Internal Server Error' 
+  } catch (error) {
+    console.error("Error in fetchMetrics:", error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Internal Server Error",
     });
   }
 }
