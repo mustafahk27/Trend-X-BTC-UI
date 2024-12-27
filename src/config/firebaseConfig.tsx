@@ -1,5 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 
@@ -15,11 +15,18 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-5Z7P4X1P0J"
 };
 
-// Initialize Firebase
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Initialize Firebase properly
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Storage
-const firebaseStorage: FirebaseStorage = getStorage(app);
+// Initialize Storage with error handling
+let firebaseStorage: FirebaseStorage;
+try {
+  firebaseStorage = getStorage(app);
+} catch (error) {
+  console.error("Error initializing Firebase Storage:", error);
+  // Provide a fallback or throw error as needed
+  throw new Error("Failed to initialize Firebase Storage");
+}
 
 // Only initialize analytics on client side
 let analytics: Analytics | null = null;
