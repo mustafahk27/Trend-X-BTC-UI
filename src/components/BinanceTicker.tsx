@@ -6,34 +6,61 @@ interface BinanceTickerProps {
 
 export const BinanceTicker: React.FC<BinanceTickerProps> = ({ showFullPrice = false }) => {
   const [tickerData, setTickerData] = useState<{
+    price: string;
     priceChange: string;
     priceChangePercent: string;
   } | null>(null);
 
   useEffect(() => {
-    // Create WebSocket connection
+    // Initial price fetch
+    fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
+      .then(response => response.json())
+      .then(data => {
+        if (data.price) {
+          setTickerData(prev => ({
+            ...prev,
+            price: data.price,
+            priceChange: '0',
+            priceChangePercent: '0'
+          }));
+        }
+      });
+
+    // WebSocket connection for real-time updates
     const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setTickerData({
-        priceChange: parseFloat(data.p).toFixed(2),
-        priceChangePercent: data.P,
+        price: data.c, // Current price
+        priceChange: data.p, // Price change
+        priceChangePercent: data.P, // Price change percent
       });
     };
 
-    // Cleanup on unmount
     return () => ws.close();
   }, []);
 
-  if (!tickerData) return null;
+  if (!tickerData) return <div>Loading...</div>;
 
   const isPositive = parseFloat(tickerData.priceChange) >= 0;
 
   return (
     <div className="flex items-center text-sm">
+      {showFullPrice && (
+        <span className="text-white font-medium mr-2">
+          ${parseFloat(tickerData.price).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
+        </span>
+      )}
       <span className={`${isPositive ? 'text-[#4CD964]' : 'text-[#FF3B30]'} font-medium`}>
-        ${tickerData.priceChange} ({tickerData.priceChangePercent}%)
+        ${Math.abs(parseFloat(tickerData.priceChange)).toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })} 
+        ({isPositive ? '+' : '-'}{Math.abs(parseFloat(tickerData.priceChangePercent))}%)
       </span>
     </div>
   );
