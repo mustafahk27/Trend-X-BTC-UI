@@ -1,7 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { storage } from '@/config/firebaseConfig';
-import { getDownloadURL, ref } from 'firebase/storage';
+//import storage from '@/config/firebaseConfig';
+import { getStorage, getDownloadURL, ref } from 'firebase/storage';
+import { initializeApp } from 'firebase/app';
 import Papa from 'papaparse';
+
+
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -24,7 +27,7 @@ interface PredictionRow {
   Date: string;
   'Predicted Close': string;
 }
-
+const storage = getStorage(); 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const fileRef = ref(storage, 'data/predictions.csv');

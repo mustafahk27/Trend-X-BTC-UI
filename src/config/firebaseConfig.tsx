@@ -1,28 +1,16 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getStorage } from "firebase/storage"; // Import Firebase Storage
+import { initializeApp } from 'firebase/app';
+import { getStorage } from 'firebase/storage';
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDNrcmWLZkA46-lJlwfC51TI--QkCLxXZg",
-  authDomain: "trend-x-btc-c7d80.firebaseapp.com",
-  databaseURL: "https://trend-x-btc-c7d80-default-rtdb.firebaseio.com",
-  projectId: "trend-x-btc-c7d80",
-  storageBucket: "trend-x-btc-c7d80.firebasestorage.app",
-  messagingSenderId: "873033239854",
-  appId: "1:873033239854:web:5dc6fec76cb7bfd6d7bebf",
-  measurementId: "G-5Z7P4X1P0J"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app); // Initialize Firebase Storage
+const storage = getStorage(app);
 
-// Only initialize analytics on client side
-let analytics = null;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
-}
-
-export { app, analytics, storage }; // Export the app, analytics, and storage instances 
+export default storage;

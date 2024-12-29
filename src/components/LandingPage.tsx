@@ -87,7 +87,19 @@ interface CustomElements {
 
 // Extend JSX.IntrinsicElements
 declare module '@react-three/fiber' {
-  type ThreeElements = CustomElements;
+  interface ThreeElements {
+    holographicMaterial: Object3DNode<
+      THREE.ShaderMaterial & {
+        time: number;
+        color: THREE.Color;
+        freqX: number;
+        freqY: number;
+        freqZ: number;
+        amp: number;
+      },
+      typeof HolographicMaterial
+    >
+  }
 }
 
 function ParticleRing({ radius = 2, count = 80 }) {
@@ -121,7 +133,7 @@ function ParticleRing({ radius = 2, count = 80 }) {
       {points.map((point, i) => (
         <mesh key={i} position={point}>
           <sphereGeometry args={[0.02, 16, 16]} />
-          <meshBasicMaterial color="#F7931A" transparent opacity={0.6} />
+          <meshBasicMaterial color="#F7931A" transparent={true} opacity={0.6} />
         </mesh>
       ))}
     </group>
@@ -156,7 +168,7 @@ function CoinEdgeDetail() {
       {Array.from({ length: 120 }).map((_, i) => (
         <mesh key={i} rotation={[0, (i / 120) * Math.PI * 2, 0]} position={[3, 0, 0]}>
           <boxGeometry args={[0.05, 0.3, 0.05]} />
-          <meshStandardMaterial color="#F7931A" metalness={0.9} roughness={0.3} />
+          <meshStandardMaterial attach="material" args={undefined} />
         </mesh>
       ))}
     </group>
@@ -458,6 +470,8 @@ function EnhancedScene() {
           />
           <ChromaticAberration
             offset={new Vector2(0.001, 0.001)}
+            radialModulation={false}
+            modulationOffset={0.0}
           />
         </EffectComposer>
 

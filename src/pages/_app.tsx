@@ -2,7 +2,14 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
 import { useRouter } from "next/router";
-import type { AppPropsWithLayout } from 'next/app';
+import type { AppProps } from 'next/app';
+
+// Define the custom AppPropsWithLayout type
+type AppPropsWithLayout = AppProps & {
+  Component: AppProps['Component'] & {
+    getLayout?: (page: React.ReactElement) => React.ReactNode;
+  };
+};
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
@@ -14,6 +21,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const isTechTeamPage = router.pathname === '/tech-team';
 
   const shouldExcludeLayout = isAuthPage || isStartPage || isChatbotPage || isDashboardPage || isPredictionPage || isTechTeamPage;
+
+  // Use the getLayout function if it exists, otherwise use the default layout
+  const getLayout = Component.getLayout || ((page) => <Layout>{page}</Layout>);
 
   return (
     <ClerkProvider

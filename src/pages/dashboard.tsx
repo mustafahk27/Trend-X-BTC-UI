@@ -33,6 +33,12 @@ interface APIResponse {
   isStale: boolean;
 }
 
+// Define the type for a prediction point
+type PredictionPoint = {
+  x: string | number;
+  y: string | number;
+};
+
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<BTCMetrics | null>(null);
   const [predictions, setPredictions] = useState<{
@@ -100,7 +106,7 @@ export default function Dashboard() {
 
       if (data.graphData && Array.isArray(data.graphData)) {
         const formattedData = data.graphData
-          .map((item: { x: string | number; y: string | number }) => {
+          .map((item: PredictionPoint) => {
             try {
               // Ensure we have both x and y values
               if (!item.x || !item.y) {
