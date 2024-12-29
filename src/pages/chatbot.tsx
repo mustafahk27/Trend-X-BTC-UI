@@ -11,7 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { RefreshCw, Send, ArrowLeft, BarChart2, Search, ChevronDown, Users } from "lucide-react";
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserButton, useUser, UserResource } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { Wand2 } from "lucide-react";
 import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
@@ -29,7 +29,7 @@ const tvly = tavily({
   apiKey: process.env.NEXT_PUBLIC_TAVILY_API_KEY || '' 
 }); */
 
-type UserType = UserResource | null;
+type UserType = ReturnType<typeof useUser>['user'];
 
 type Message = {
   content: string;
