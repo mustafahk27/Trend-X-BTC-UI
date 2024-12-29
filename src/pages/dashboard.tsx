@@ -91,9 +91,12 @@ export default function Dashboard() {
         throw new Error('Failed to fetch current price');
       }
       const data = await response.json();
-      setCurrentPrice(Number(data.price));
-    } catch (err) {
-      console.error('Error fetching current price:', err);
+      if (data.price) {
+        setCurrentPrice(parseFloat(data.price));
+        console.log('Current price updated:', data.price); // Debug log
+      }
+    } catch (error) {
+      console.error('Error fetching current price:', error);
     }
   }, []);
 
@@ -181,8 +184,12 @@ export default function Dashboard() {
   const stats = [
     {
       title: "Current Price",
-      value: currentPrice ? `$${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...',
-//      change: "+2.5%",
+      value: currentPrice 
+        ? `$${currentPrice.toLocaleString(undefined, { 
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2 
+          })}` 
+        : 'Fetching...',
       isPositive: true,
       icon: DollarSign,
     },
