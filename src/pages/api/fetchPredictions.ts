@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-//import storage from '@/config/firebaseConfig';
-import { getStorage, getDownloadURL, ref } from 'firebase/storage';
-import { initializeApp } from 'firebase/app';
+import { storage } from '@/config/firebaseConfig';
+import { getDownloadURL, ref } from 'firebase/storage';
 import Papa from 'papaparse';
-
-
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
@@ -27,12 +24,38 @@ interface PredictionRow {
   Date: string;
   'Predicted Close': string;
 }
-const storage = getStorage(); 
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const fileRef = ref(storage, 'data/predictions.csv');
-    const url = await getDownloadURL(fileRef);
+    console.log('Attempting to fetch predictions from Firebase Storage');
     
+    const fileRef = ref(storage, 'data/predictions.csv');
+    console.log('Storage reference created for:', fileRef.fullPath);
+    
+    let url;
+    try {
+      url = await getDownloadURL(fileRef);
+      console.log('Successfully obtained download URL');
+    } catch (error: any) {
+      console.error('Firebase Storage error:', {
+        code: error.code,
+        message: error.message,
+        fullPath: fileRef.fullPath
+      });
+      throw new Error(`Failed to get download URL: ${error.message}`);
+    }
+    
+    try {
+      const testResponse = await fetch(url);
+      if (!testResponse.ok) {
+        throw new Error(`URL test failed with status: ${testResponse.status}`);
+      }
+      console.log('URL test successful - file is accessible');
+    } catch (error) {
+      console.error('URL test failed:', error);
+      throw error;
+    }
+
     const response = await fetchWithRetry(url);
     const csvText = await response.text();
     

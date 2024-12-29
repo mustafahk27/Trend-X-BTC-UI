@@ -1,5 +1,5 @@
-import { initializeApp } from 'firebase/app';
-import { getStorage } from 'firebase/storage';
+import { initializeApp, getApps } from 'firebase/app';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,7 +10,16 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
+// Initialize Firebase only if it hasn't been initialized
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 
-export default storage;
+// Initialize Storage with error handling
+let storage: FirebaseStorage;
+try {
+  storage = getStorage(app);
+} catch (error) {
+  console.error('Firebase Storage initialization error:', error);
+  throw new Error('Failed to initialize Firebase Storage');
+}
+
+export { storage, app };
