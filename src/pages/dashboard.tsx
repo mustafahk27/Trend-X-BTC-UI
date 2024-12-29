@@ -93,10 +93,17 @@ export default function Dashboard() {
       const data = await response.json();
       if (data.price) {
         setCurrentPrice(parseFloat(data.price));
-        console.log('Current price updated:', data.price); // Debug log
+      } else {
+        // Add fallback to Binance WebSocket price if API fails
+        const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const binanceData = await binanceResponse.json();
+        if (binanceData.price) {
+          setCurrentPrice(parseFloat(binanceData.price));
+        }
       }
     } catch (error) {
       console.error('Error fetching current price:', error);
+      // Don't set currentPrice to null to maintain last known price
     }
   }, []);
 
@@ -189,7 +196,7 @@ export default function Dashboard() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2 
           })}` 
-        : 'Fetching...',
+        : <BinanceTicker showFullPrice={true} />,
       isPositive: true,
       icon: DollarSign,
     },

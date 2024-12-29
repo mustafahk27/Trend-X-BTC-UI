@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 
-export function BinanceTicker() {
+interface BinanceTickerProps {
+  showFullPrice?: boolean;
+}
+
+export const BinanceTicker: React.FC<BinanceTickerProps> = ({ showFullPrice = false }) => {
   const [tickerData, setTickerData] = useState<{
     priceChange: string;
     priceChangePercent: string;
@@ -33,4 +37,4 @@ export function BinanceTicker() {
       </span>
     </div>
   );
-} 
+}; 
