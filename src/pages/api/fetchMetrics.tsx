@@ -1,15 +1,14 @@
-// fetchMetrics.tsx
-
-import type { NextApiRequest, NextApiResponse } from "next";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
-import Papa from "papaparse";
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/config/firebaseConfig';
+import Papa from 'papaparse';
 
 interface BTCMetrics {
   Date: string;
   Open: number;
   High: number;
   Volume: number;
-  "Number of trades": number;
+  'Number of trades': number;
   avg_block_size: number;
   value: number;
   net_order_flow: number;
@@ -18,11 +17,14 @@ interface BTCMetrics {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // Get the Firebase Storage instance
-    const storage = getStorage(); 
+    const filePath = 'data/cleaned_data.csv';
+    const metricsRef = ref(storage, filePath);
 
-    const metricsRef = ref(storage, "data/cleaned_data.csv");
+    console.log(`Fetching file: ${filePath}`);
+
     const downloadURL = await getDownloadURL(metricsRef);
+
+    console.log(`File URL: ${downloadURL}`);
 
     const response = await fetch(downloadURL);
     if (!response.ok) {
@@ -37,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (parsed.errors.length > 0) {
-      throw new Error("Error parsing CSV data.");
+      throw new Error('Error parsing CSV data.');
     }
 
     const data = parsed.data;
@@ -54,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       lastUpdated: latestData.Date,
     });
   } catch (error) {
-    console.error("Error in fetch metrics:", error);
+    console.error('Error in fetch metrics:', error);
     res.status(500).json({
       error: 'Failed to fetch metrics',
     });
