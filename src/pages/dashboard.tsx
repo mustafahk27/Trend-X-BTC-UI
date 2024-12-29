@@ -295,11 +295,6 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm text-gray-400">{stat.title}</p>
                     <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
-                    {stat.title === "Current Price" && (
-                      <div className="mt-2">
-                        <BinanceTicker />
-                      </div>
-                    )}
                     {stat.change && (
                       <div className={`flex items-center mt-2 ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
                         {stat.isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
