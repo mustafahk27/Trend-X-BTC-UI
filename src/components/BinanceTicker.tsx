@@ -46,16 +46,16 @@ export const BinanceTicker: React.FC<BinanceTickerProps> = ({ showFullPrice = fa
   const isPositive = parseFloat(tickerData.priceChange) >= 0;
 
   return (
-    <div className="flex items-center text-sm">
+    <div className="flex items-center">
       {showFullPrice && (
-        <span className="text-white font-medium mr-2">
+        <span className="text-2xl font-bold text-white mr-2">
           ${parseFloat(tickerData.price).toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           })}
         </span>
       )}
-      <span className={`${isPositive ? 'text-[#4CD964]' : 'text-[#FF3B30]'} font-medium`}>
+      <span className={`${isPositive ? 'text-[#4CD964]' : 'text-[#FF3B30]'} text-sm font-medium`}>
         ${Math.abs(parseFloat(tickerData.priceChange)).toLocaleString(undefined, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
