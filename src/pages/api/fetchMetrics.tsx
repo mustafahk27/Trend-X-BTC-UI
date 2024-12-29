@@ -20,11 +20,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const filePath = 'data/cleaned_data.csv';
     const metricsRef = ref(storage, filePath);
 
-    console.log(`Fetching file: ${filePath}`);
+    console.log('Attempting to fetch metrics:', {
+      filePath,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    });
 
     const downloadURL = await getDownloadURL(metricsRef);
-
-    console.log(`File URL: ${downloadURL}`);
+    console.log('Successfully got download URL');
 
     const response = await fetch(downloadURL);
     if (!response.ok) {
@@ -39,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (parsed.errors.length > 0) {
+      console.error('CSV parsing errors:', parsed.errors);
       throw new Error('Error parsing CSV data.');
     }
 
@@ -56,9 +59,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       lastUpdated: latestData.Date,
     });
   } catch (error) {
-    console.error('Error in fetch metrics:', error);
+    console.error('Detailed error in fetch metrics:', {
+      error,
+      firebaseConfig: {
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+      }
+    });
     res.status(500).json({
       error: 'Failed to fetch metrics',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }

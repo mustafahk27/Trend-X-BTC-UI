@@ -39,6 +39,24 @@ type PredictionPoint = {
   y: string | number;
 };
 
+interface PredictionDataPoint {
+  timestamp: string;
+  price: number;
+}
+
+interface MetricsResponse {
+  metrics: BTCMetrics;
+  lastUpdated: string;
+  isStale: boolean;
+}
+
+interface PredictionResponse {
+  graphData: Array<{
+    x: number;
+    y: number;
+  }>;
+}
+
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<BTCMetrics | null>(null);
   const [predictions, setPredictions] = useState<{
@@ -53,34 +71,16 @@ export default function Dashboard() {
     isPositive: true
   });
 
-  const fetchMetrics = useCallback(async () => {
-    setLoading(true);
+  const fetchMetrics = useCallback(async (): Promise<MetricsResponse | null> => {
     try {
       const response = await fetch('/api/fetchMetrics');
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch metrics');
+        throw new Error('Failed to fetch metrics');
       }
-
-      const data: APIResponse = await response.json();
-      console.log('Fetched data:', data);
-
-      if (data.metrics) {
-        console.log('Metrics received:', data.metrics);
-        setMetrics(data.metrics);
-      } else {
-        console.warn('No metrics found in the response:', data);
-        setError('No metrics data found.');
-      }
-
-      setError(null);
-    } catch (err: unknown) {
-      console.error('Fetch Error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load metrics data');
-      setMetrics(null);
-      setPredictions(null);
-    } finally {
-      setLoading(false);
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching metrics:', error);
+      return null;
     }
   }, []);
 
@@ -91,90 +91,112 @@ export default function Dashboard() {
         throw new Error('Failed to fetch current price');
       }
       const data = await response.json();
-      setCurrentPrice(Number(data.price));
-    } catch (err) {
-      console.error('Error fetching current price:', err);
+      if (data.price) {
+        setCurrentPrice(parseFloat(data.price));
+      } else {
+        // Add fallback to Binance WebSocket price if API fails
+        const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const binanceData = await binanceResponse.json();
+        if (binanceData.price) {
+          setCurrentPrice(parseFloat(binanceData.price));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching current price:', error);
+      // Don't set currentPrice to null to maintain last known price
     }
   }, []);
 
-  const fetchPredictions = useCallback(async () => {
+  const formatPredictionData = (data: any[]) => {
+    console.log('Raw prediction data:', data); // Debug log
+
+    return data.map(point => {
+      // Handle different possible data structures
+      const timestamp = point.timestamp || point.x || point.date;
+      const price = point.price || point.y || point.value;
+
+      console.log('Processing point:', { timestamp, price }); // Debug log
+
+      return {
+        x: new Date(timestamp).getTime(),
+        y: typeof price === 'string' ? parseFloat(price) : price
+      };
+    }).filter(point => {
+      const isValid = !isNaN(point.x) && !isNaN(point.y);
+      if (!isValid) {
+        console.log('Filtered out invalid point:', point); // Debug log
+      }
+      return isValid;
+    });
+  };
+
+  const fetchPredictions = async (): Promise<PredictionResponse | null> => {
     try {
       const response = await fetch('/api/fetchPredictions');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       const data = await response.json();
       
-      console.log('Raw predictions response:', data);
-
-      if (data.graphData && Array.isArray(data.graphData)) {
-        const formattedData = data.graphData
-          .map((item: PredictionPoint) => {
-            try {
-              // Ensure we have both x and y values
-              if (!item.x || !item.y) {
-                console.warn('Missing x or y value:', item);
-                return null;
-              }
-
-              const timestamp = typeof item.x === 'string' ? new Date(item.x).getTime() : Number(item.x);
-              const price = typeof item.y === 'string' ? parseFloat(item.y) : Number(item.y);
-              
-              if (!isNaN(timestamp) && !isNaN(price)) {
-                return {
-                  x: timestamp,
-                  y: price
-                };
-              }
-              console.warn('Invalid timestamp or price:', { timestamp, price });
-              return null;
-            } catch (error) {
-              console.error('Error processing prediction point:', error, item);
-              return null;
-            }
-          })
-          .filter((item): item is { x: number; y: number } => item !== null);
-
-        console.log('Formatted predictions:', formattedData);
-
-        if (formattedData.length > 0) {
-          setPredictions(formattedData);
-        } else {
-          console.error('No valid prediction points after formatting');
-        }
-      } else {
-        console.error('Invalid or missing graphData in predictions response');
+      if (!data.graphData) {
+        console.error('No graphData in response');
+        return null;
       }
-    } catch (err) {
-      console.error('Error fetching predictions:', err);
+
+      return {
+        graphData: formatPredictionData(data.graphData)
+      };
+    } catch (error) {
+      console.error('Error in fetchPredictions:', error);
+      return null;
     }
-  }, []);
+  };
 
   // Fetch metrics on component mount and set up periodic fetching
   useEffect(() => {
     const fetchData = async () => {
-      await Promise.all([
-        fetchMetrics(),
-        fetchCurrentPrice(),
-        fetchPredictions()
-      ]);
+      try {
+        setLoading(true); // Start loading
+        
+        // Fetch all data in parallel
+        const [metricsResponse, predictionsResponse, priceData] = await Promise.all([
+          fetchMetrics(),
+          fetchPredictions(),
+          fetchCurrentPrice()
+        ]);
+
+        // Update states as soon as data is available
+        if (metricsResponse?.metrics) {
+          setMetrics(metricsResponse.metrics);
+        }
+
+        if (predictionsResponse?.graphData) {
+          setPredictions(predictionsResponse.graphData);
+        }
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError('Failed to load data');
+      } finally {
+        setLoading(false); // End loading regardless of outcome
+      }
     };
 
-    // Initial fetch
     fetchData();
-    
-    // Set up intervals
-    const intervals = [
-      setInterval(fetchCurrentPrice, 10000),
-      setInterval(fetchData, 60000)
-    ];
-    
-    return () => intervals.forEach(clearInterval);
-  }, [fetchMetrics, fetchCurrentPrice, fetchPredictions]);
+    const priceInterval = setInterval(fetchCurrentPrice, 30000);
+    return () => clearInterval(priceInterval);
+  }, [fetchCurrentPrice]);
 
   // Generate stats array from metrics
   const stats = [
     {
       title: "Current Price",
-      value: currentPrice ? `$${currentPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}` : 'Loading...',
-//      change: "+2.5%",
+      value: currentPrice 
+        ? `$${currentPrice.toLocaleString(undefined, { 
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2 
+          })}` 
+        : <BinanceTicker showFullPrice={true} />,
       isPositive: true,
       icon: DollarSign,
     },
@@ -273,11 +295,6 @@ export default function Dashboard() {
                   <div>
                     <p className="text-sm text-gray-400">{stat.title}</p>
                     <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
-                    {stat.title === "Current Price" && (
-                      <div className="mt-2">
-                        <BinanceTicker />
-                      </div>
-                    )}
                     {stat.change && (
                       <div className={`flex items-center mt-2 ${stat.isPositive ? 'text-green-500' : 'text-red-500'}`}>
                         {stat.isPositive ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
