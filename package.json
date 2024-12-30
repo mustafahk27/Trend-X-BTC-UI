@@ -24,6 +24,7 @@
     "@react-three/fiber": "^8.17.10",
     "@react-three/postprocessing": "^2.16.3",
     "@tavily/core": "^0.0.2",
+    "@types/nodemailer": "^6.4.17",
     "@types/papaparse": "^5.3.15",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -33,6 +34,7 @@
     "groq-sdk": "^0.9.0",
     "lucide-react": "^0.453.0",
     "next": "14.2.15",
+    "nodemailer": "^6.9.16",
     "papaparse": "^5.4.1",
     "react": "^18",
     "react-dom": "^18",
@@ -40,6 +42,7 @@
     "react-markdown": "^9.0.1",
     "react-spring": "^9.7.4",
     "recharts": "^2.13.0",
+    "svix": "^1.44.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.170.0"
