@@ -3,6 +3,8 @@ import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
 import nodemailer from 'nodemailer';
 
+//Email automation 
+
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
