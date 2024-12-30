@@ -4,6 +4,7 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import nodemailer from 'nodemailer';
 
 //Email automation 
+//new changes
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
