@@ -17,12 +17,6 @@ import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
 import Groq from 'groq-sdk';
 
-// Initialize clients with browser safety flag
-const groq = new Groq({
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY || '',
-  dangerouslyAllowBrowser: true
-});
-
 // Note: These APIs are prepared for future use in advanced features
 /* const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
 const tvly = tavily({ 
@@ -452,28 +446,22 @@ export default function ChatbotPage() {
         return;
       }
 
-      const completion = await groq.chat.completions.create({
-        messages: [
-          {
-            role: 'system',
-            content: `You are a helpful AI assistant. Please format your responses with:
-            - Bold headings using markdown (e.g., **Heading**)
-            - Clear paragraph separation with blank lines
-            - Strategic use of bullet points and numbered lists
-            - Proper hierarchy with headings and subheadings
-            - Professional formatting throughout
-            - Code blocks when sharing code
-            - Tables when presenting structured data`
-          },
-          {
-            role: 'user',
-            content: input
-          }
-        ],
-        model: selectedModel.id,
-        temperature: 0.7,
-        max_tokens: 1000,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          modelId: selectedModel.id
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const completion = await response.json();
 
       const aiMessage: EnhancedMessage = {
         content: completion.choices[0]?.message?.content || 'No response generated.',

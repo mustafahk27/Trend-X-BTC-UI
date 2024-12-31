@@ -1,9 +1,9 @@
+import { Groq } from 'groq-sdk';
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY || '',
+  apiKey: process.env.GROQ_API_KEY
 });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -25,65 +25,68 @@ const MODEL_MAP: { [key: string]: string } = {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { messages, modelId } = body;
+    const modelId = body.modelId;
+    const isGemini = modelId.startsWith('gemini-');
 
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: 'Invalid messages format' },
-        { status: 400 }
-      );
-    }
-
-    if (!modelId) {
-      return NextResponse.json(
-        { error: 'Model ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const actualModelId = MODEL_MAP[modelId];
-
-    if (modelId === 'gemini-pro' || modelId === 'gemini-flash') {
-      const model = genAI.getGenerativeModel({ model: actualModelId });
-      const chat = model.startChat();
+    if (isGemini) {
+      // Handle Gemini models
+      const model = genAI.getGenerativeModel({ model: MODEL_MAP[modelId] });
       
-      const systemMessage = messages.find(msg => msg.role === 'system');
-      if (systemMessage) {
-        await chat.sendMessage(systemMessage.content);
-      }
-      
-      const userMessage = messages[messages.length - 1];
-      const result = await chat.sendMessage(userMessage.content);
-      const response = await result.response.text();
+      const chat = model.startChat({
+        history: [
+          {
+            role: "user",
+            parts: [{ text: "You are a helpful AI assistant. Please format your responses with: - Bold headings using markdown - Clear paragraph separation - Strategic use of bullet points and lists - Professional formatting throughout" }],
+          },
+          {
+            role: "model",
+            parts: [{ text: "I understand. I will format my responses using markdown with bold headings, clear paragraphs, and strategic use of bullet points and lists while maintaining professional formatting." }],
+          },
+        ],
+      });
+
+      const result = await chat.sendMessage(body.message);
+      const response = await result.response;
       
       return NextResponse.json({
-        content: response,
-        role: 'assistant'
+        choices: [
+          {
+            message: {
+              content: response.text(),
+            },
+          },
+        ],
       });
+    } else {
+      // Handle non-Gemini models with Groq
+      const actualModelId = MODEL_MAP[modelId];
+      
+      const completion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: `You are a helpful AI assistant. Please format your responses with:
+            - Bold headings using markdown
+            - Clear paragraph separation
+            - Strategic use of bullet points and lists
+            - Professional formatting throughout`
+          },
+          {
+            role: 'user',
+            content: body.message
+          }
+        ],
+        model: actualModelId,
+        temperature: 0.7,
+        max_tokens: 1000,
+      });
+
+      return NextResponse.json(completion);
     }
-
-    const completion = await groq.chat.completions.create({
-      messages: messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      })),
-      model: actualModelId,
-      temperature: 0.7,
-      max_tokens: 1024,
-    });
-
-    return NextResponse.json({
-      content: completion.choices[0]?.message?.content || '',
-      role: 'assistant'
-    });
-
   } catch (error) {
-    console.error('Error in chat route:', error);
+    console.error('API Error:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to process chat request', 
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
+      { error: error instanceof Error ? error.message : 'An unknown error occurred' }, 
       { status: 500 }
     );
   }
