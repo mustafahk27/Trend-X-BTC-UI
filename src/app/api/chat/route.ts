@@ -11,7 +11,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const MODEL_MAP: { [key: string]: string } = {
   'mixtral-8x7b-32k': 'mixtral-8x7b-32768',
   'gemma-2-9b': 'gemma2-9b-it',
-  'gemma-7b': 'gemma-7b-it',
   'gemini-pro': 'gemini-1.5-pro',
   'gemini-flash': 'gemini-1.5-flash',
   'llama-3-70b-versatile': 'llama-3.1-70b-versatile',

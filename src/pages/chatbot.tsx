@@ -65,7 +65,7 @@ const modelCategories: ModelCategory[] = [
       { id: 'gemini-pro', name: 'Gemini 1.5 Pro', description: 'Advanced Google AI model with strong reasoning' },
       { id: 'gemini-flash', name: 'Gemini 1.5 Flash', description: 'Fast and efficient Google AI model' },
       { id: 'gemma-2-9b', name: 'Gemma 2 9B', description: 'Efficient mid-sized language model' },
-      { id: 'gemma-7b', name: 'Gemma 7B', description: 'Lightweight yet capable language model' },
+      
     ]
   },
   {
@@ -416,7 +416,11 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const { user } = useUser();
-  const [selectedModel, setSelectedModel] = useState<LLMModel>(modelCategories[0].models[0]);
+  const [selectedModel, setSelectedModel] = useState<LLMModel>(() => {
+    const mistralCategory = modelCategories.find(category => category.title === "Mistral LLMs");
+    const mixtralModel = mistralCategory?.models.find(model => model.id === 'mixtral-8x7b-32k');
+    return mixtralModel || modelCategories[0].models[0];
+  });
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 
   const scrollToBottom = () => {
