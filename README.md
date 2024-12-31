@@ -2,6 +2,7 @@
 <div style="width: 400px; height: 300px; overflow: hidden;">
   <img src="public/Trend-X-BTC_readme.png" alt="Approach Overview" style="width: 100%; height: 100%; object-fit: cover; object-position: top right;" />
 </div>
+
 ## Table of Contents
 - [Overview](#overview)
 - [Key Features](#key-features)
@@ -11,6 +12,7 @@
 - [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
+
 
 ## Overview
 **TREND-X-BTC** is an advanced cryptocurrency price prediction system leveraging LSTM neural networks combined with attention mechanisms to forecast Bitcoin prices with an impressive 98% accuracy. The project integrates real-time market data, sentiment analysis, and blockchain metrics to deliver comprehensive insights and accurate forecasts, empowering users to make confident and informed trading decisions.
