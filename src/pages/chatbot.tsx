@@ -265,8 +265,8 @@ const ChatMessage = ({ message, user, isTyping }: {
                     src="/ai-avatar.png" 
                     alt="AI" 
                     className="w-full h-full object-cover"
-                    width={40}
-                    height={40}
+                    width={32}
+                    height={32}
                   />
                 </AvatarFallback>
               </>
@@ -490,52 +490,60 @@ export default function ChatbotPage() {
   const handleWebSearch = async () => {
     setIsSearching(true);
     try {
-      // Get search results and analysis
       const searchResponse = await fetch('/api/search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           query: input,
           webSearchEnabled: true
-        })
+        }),
       });
 
       if (!searchResponse.ok) {
-        throw new Error('Failed to get search results');
+        throw new Error('Search failed');
       }
 
       const searchData = await searchResponse.json();
       
-      if (!searchData.results || searchData.results.length === 0) {
-        throw new Error('No search results found');
+      // Send search results to the selected LLM
+      const llmResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `Based on the following search results, ${input}\n\nSearch Results:\n${JSON.stringify(searchData, null, 2)}`,
+          modelId: selectedModel.id
+        }),
+      });
+
+      if (!llmResponse.ok) {
+        throw new Error('LLM processing failed');
       }
 
+      const completion = await llmResponse.json();
+      
       const aiMessage: EnhancedMessage = {
-        content: searchData.analysis,
+        content: completion.choices[0]?.message?.content || 'No response generated.',
         isUser: false,
         timestamp: new Date(),
-        citations: searchData.citations.map((citation: {
-          url: string;
-          title: string;
-          snippet: string;
-        }) => ({
-          url: citation.url,
-          title: citation.title,
-          snippet: citation.snippet
-        }))
+        citations: searchData.citations
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Web search error:', error);
+      console.error('Search error:', error);
       const errorMessage: EnhancedMessage = {
-        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try rephrasing your question.`,
+        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try again.`,
         isUser: false,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsSearching(false);
+      setInput('');
     }
   };
 
@@ -696,8 +704,8 @@ export default function ChatbotPage() {
                       src="/ai-avatar.png" 
                       alt="AI" 
                       className="w-full h-full object-cover"
-                      width={40}
-                      height={40}
+                      width={32}
+                      height={32}
                     />
                   </AvatarFallback>
                 </Avatar>
@@ -724,7 +732,9 @@ export default function ChatbotPage() {
                     <Image 
                       src="/ai-avatar.png" 
                       alt="AI" 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover"
+                      width={32}
+                      height={32}
                     />
                   </AvatarFallback>
                 </Avatar>
