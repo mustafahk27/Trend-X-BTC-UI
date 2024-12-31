@@ -17,12 +17,6 @@ import { NavButton } from "@/components/ui/nav-button";
 import ReactMarkdown from 'react-markdown';
 import Groq from 'groq-sdk';
 
-// Initialize clients with browser safety flag
-const groq = new Groq({
-  apiKey: process.env.NEXT_PUBLIC_GROQ_API_KEY || '',
-  dangerouslyAllowBrowser: true
-});
-
 // Note: These APIs are prepared for future use in advanced features
 /* const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
 const tvly = tavily({ 
@@ -71,7 +65,7 @@ const modelCategories: ModelCategory[] = [
       { id: 'gemini-pro', name: 'Gemini 1.5 Pro', description: 'Advanced Google AI model with strong reasoning' },
       { id: 'gemini-flash', name: 'Gemini 1.5 Flash', description: 'Fast and efficient Google AI model' },
       { id: 'gemma-2-9b', name: 'Gemma 2 9B', description: 'Efficient mid-sized language model' },
-      { id: 'gemma-7b', name: 'Gemma 7B', description: 'Lightweight yet capable language model' },
+      
     ]
   },
   {
@@ -271,8 +265,8 @@ const ChatMessage = ({ message, user, isTyping }: {
                     src="/ai-avatar.png" 
                     alt="AI" 
                     className="w-full h-full object-cover"
-                    width={40}
-                    height={40}
+                    width={32}
+                    height={32}
                   />
                 </AvatarFallback>
               </>
@@ -422,7 +416,11 @@ export default function ChatbotPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const { user } = useUser();
-  const [selectedModel, setSelectedModel] = useState<LLMModel>(modelCategories[0].models[0]);
+  const [selectedModel, setSelectedModel] = useState<LLMModel>(() => {
+    const mistralCategory = modelCategories.find(category => category.title === "Mistral LLMs");
+    const mixtralModel = mistralCategory?.models.find(model => model.id === 'mixtral-8x7b-32k');
+    return mixtralModel || modelCategories[0].models[0];
+  });
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 
   const scrollToBottom = () => {
@@ -452,28 +450,22 @@ export default function ChatbotPage() {
         return;
       }
 
-      const completion = await groq.chat.completions.create({
-        messages: [
-          {
-            role: 'system',
-            content: `You are a helpful AI assistant. Please format your responses with:
-            - Bold headings using markdown (e.g., **Heading**)
-            - Clear paragraph separation with blank lines
-            - Strategic use of bullet points and numbered lists
-            - Proper hierarchy with headings and subheadings
-            - Professional formatting throughout
-            - Code blocks when sharing code
-            - Tables when presenting structured data`
-          },
-          {
-            role: 'user',
-            content: input
-          }
-        ],
-        model: selectedModel.id,
-        temperature: 0.7,
-        max_tokens: 1000,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          modelId: selectedModel.id
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const completion = await response.json();
 
       const aiMessage: EnhancedMessage = {
         content: completion.choices[0]?.message?.content || 'No response generated.',
@@ -498,52 +490,60 @@ export default function ChatbotPage() {
   const handleWebSearch = async () => {
     setIsSearching(true);
     try {
-      // Get search results and analysis
       const searchResponse = await fetch('/api/search', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           query: input,
           webSearchEnabled: true
-        })
+        }),
       });
 
       if (!searchResponse.ok) {
-        throw new Error('Failed to get search results');
+        throw new Error('Search failed');
       }
 
       const searchData = await searchResponse.json();
       
-      if (!searchData.results || searchData.results.length === 0) {
-        throw new Error('No search results found');
+      // Send search results to the selected LLM
+      const llmResponse = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `Based on the following search results, ${input}\n\nSearch Results:\n${JSON.stringify(searchData, null, 2)}`,
+          modelId: selectedModel.id
+        }),
+      });
+
+      if (!llmResponse.ok) {
+        throw new Error('LLM processing failed');
       }
 
+      const completion = await llmResponse.json();
+      
       const aiMessage: EnhancedMessage = {
-        content: searchData.analysis,
+        content: completion.choices[0]?.message?.content || 'No response generated.',
         isUser: false,
         timestamp: new Date(),
-        citations: searchData.citations.map((citation: {
-          url: string;
-          title: string;
-          snippet: string;
-        }) => ({
-          url: citation.url,
-          title: citation.title,
-          snippet: citation.snippet
-        }))
+        citations: searchData.citations
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Web search error:', error);
+      console.error('Search error:', error);
       const errorMessage: EnhancedMessage = {
-        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try rephrasing your question.`,
+        content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try again.`,
         isUser: false,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsSearching(false);
+      setInput('');
     }
   };
 
@@ -704,8 +704,8 @@ export default function ChatbotPage() {
                       src="/ai-avatar.png" 
                       alt="AI" 
                       className="w-full h-full object-cover"
-                      width={40}
-                      height={40}
+                      width={32}
+                      height={32}
                     />
                   </AvatarFallback>
                 </Avatar>
@@ -732,7 +732,9 @@ export default function ChatbotPage() {
                     <Image 
                       src="/ai-avatar.png" 
                       alt="AI" 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover"
+                      width={32}
+                      height={32}
                     />
                   </AvatarFallback>
                 </Avatar>

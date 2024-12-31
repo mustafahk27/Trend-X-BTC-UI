@@ -70,6 +70,12 @@ export async function POST(request: Request) {
     const host = headersList.get('host');
     const protocol = process.env.NODE_ENV === 'development' ? 'http' : 'https';
 
+    console.log('Search request received:', {
+      query,
+      webSearchEnabled,
+      hasApiKey: !!searchApiKey
+    });
+
     // Fetch current Bitcoin price and market data
     const btcResponse = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_vol=true&include_24hr_change=true&include_market_cap=true');
     if (!btcResponse.ok) {
@@ -183,21 +189,9 @@ ${topCoinsData
       body: JSON.stringify({
         query: searchQuery,
         search_depth: 'advanced',
-        include_domains: [
-          'coinmarketcap.com',
-          'coingecko.com',
-          'binance.com',
-          'coindesk.com',
-          'cointelegraph.com',
-          'cryptoslate.com',
-          'decrypt.co',
-          'theblock.co',
-          'bitcoinist.com',
-          'cryptonews.com'
-        ],
         max_results: 10,
         include_answer: true,
-        include_raw_content: true
+        include_raw_content: false
       }),
     });
 

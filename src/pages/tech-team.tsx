@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Brain, Database, Code, Layers, Clock } from "lucide-react";
+import { Brain, Database, Code, Layers, Clock, Github, ArrowUpRight } from "lucide-react";
 import Image from 'next/image';
 import { ArrowLeft } from "lucide-react";
 import { NavButton } from "@/components/ui/nav-button";
@@ -124,6 +124,23 @@ const dataSources = [
     name: 'Google BigQuery',
     logo: '/googlebigquery.jpg',
     description: 'Blockchain transaction data and network metrics'
+  }
+];
+
+// Add this new array after the dataSources array
+const repositories = [
+ 
+  {
+    name: 'Trend-X-BTC ML',
+    description: 'Deep Learning implementation and model architecture',
+    url: 'https://github.com/AhsenTahir/Trend-X-BTC',
+    tech: ['Python', 'TensorFlow', 'LSTM', 'Attention Mechanism']
+  },
+  {
+    name: 'Trend-X-BTC UI',
+    description: 'Frontend implementation and website codebase',
+    url: 'https://github.com/BurhanCantCode/BTC',
+    tech: ['Next.js', 'TypeScript', 'TailwindCSS', 'Three.js']
   }
 ];
 
@@ -293,6 +310,50 @@ export default function TechTeam() {
                   <h3 className="text-lg font-semibold text-white mb-2">{source.name}</h3>
                   <p className="text-sm text-gray-300">{source.description}</p>
                 </Card>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* Open Source Repositories Section */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="mb-20"
+        >
+          <h2 className="text-3xl font-bold text-white mb-8">Open Source Repositories</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {repositories.map((repo) => (
+              <motion.div
+                key={repo.name}
+                whileHover={{ scale: 1.02 }}
+                className="bg-black/40 border border-[#F7931A]/20 rounded-xl p-6 hover:border-[#F7931A]/40 transition-all"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-[#F7931A]">{repo.name}</h3>
+                  <Github className="w-6 h-6 text-[#F7931A]" />
+                </div>
+                <p className="text-gray-300 mb-4">{repo.description}</p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {repo.tech.map((tech) => (
+                    <span
+                      key={tech}
+                      className="text-xs bg-[#F7931A]/10 text-[#F7931A] px-2 py-1 rounded"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                <a
+                  href={repo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center text-[#F7931A] hover:text-[#F7931A]/80 transition-colors"
+                >
+                  View Repository
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
+                </a>
               </motion.div>
             ))}
           </div>
