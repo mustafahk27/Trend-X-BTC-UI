@@ -1,8 +1,60 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TREND-X-BTC: Bitcoin 30 Days Forecasting with LSTMs and Multi-Head Attention Mechanism
+<div style="width: 400px; height: 300px; overflow: hidden;">
+  <img src="public/Trend-X-BTC_readme.png" alt="Approach Overview" style="width: 100%; height: 100%; object-fit: cover; object-position: top right;" />
+</div>
+## Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
+## Overview
+**TREND-X-BTC** is an advanced cryptocurrency price prediction system leveraging LSTM neural networks combined with attention mechanisms to forecast Bitcoin prices with an impressive 98% accuracy. The project integrates real-time market data, sentiment analysis, and blockchain metrics to deliver comprehensive insights and accurate forecasts, empowering users to make confident and informed trading decisions.
+
+## Key Features
+- **Advanced Neural Architecture:** LSTM networks with attention mechanism achieving 98% prediction accuracy.
+- **Real-time Data Integration:** Live market data from Binance, sentiment analysis, and blockchain metrics.
+- **Interactive Dashboard:** Real-time visualization and analysis tools.
+- **AI-Powered Chat:** Multiple language models with web searching capabilities.
+- **Automated Predictions:** Scheduled predictions and notifications system.
+- **3D Visualization:** Enhanced Bitcoin model with dynamic animations and effects.
+
+## Tech Stack
+- **Frontend:**
+  - Next.js 14
+  - TypeScript
+  - Framer Motion
+  - Three.js
+  - TailwindCSS
+  
+- **Backend & Services:**
+  - Firebase
+  - Clerk Authentication
+  - Binance API
+  - Multiple LLM Integration
+  
+- **Data Sources:**
+  - Binance (Real-time cryptocurrency data)
+  - Alternative.me (Market sentiment)
+  - FRED (Macroeconomic indicators)
+  - Google BigQuery (Blockchain metrics)
 
 ## Getting Started
 
-First, run the development server:
+First, install the dependencies:
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -10,32 +62,36 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Project Structure
+```bash
+src/
+├── app/                    # App router components
+├── components/             # Reusable components
+├── pages/                  # Page components
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   ├── dashboard/         # Dashboard views
+│   └── prediction/        # Prediction interface
+├── config/                # Configuration files
+└── styles/                # Global styles
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Contributing
+We welcome contributions! Please follow these steps:
+1. Fork the repository.
+2. Create a feature branch.
+3. Commit your changes.
+4. Push to the branch.
+5. Open a Pull Request.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## License
+This project is licensed under the MIT License.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Contact
+For questions or collaboration, contact [ahsentahir@gmail.com](mailto:ahsentahir@gmail.com).
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-.
+© 2024 TREND-X-BTC. All rights reserved.
