@@ -9,6 +9,7 @@ import { NavButton } from "@/components/ui/nav-button";
 import { BarChart2, MessageSquare } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
+//burhan made last minute changes...
 // Tech stack data
 const techStack = [
   {
@@ -139,7 +140,7 @@ const repositories = [
   {
     name: 'Trend-X-BTC UI',
     description: 'Frontend implementation and website codebase',
-    url: 'https://github.com/BurhanCantCode/BTC',
+    url: 'https://github.com/BurhanCantCode/Trend-X-BTC-UI',
     tech: ['Next.js', 'TypeScript', 'TailwindCSS', 'Three.js']
   }
 ];
