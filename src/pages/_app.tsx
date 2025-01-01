@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import { Layout } from "@/components/Layout";
 import { useRouter } from "next/router";
 import type { AppProps } from 'next/app';
+import { AnalyticsProvider } from '@/analytics';
 
 // Define the custom AppPropsWithLayout type
 type AppPropsWithLayout = AppProps & {
@@ -26,25 +27,28 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout || ((page) => <Layout>{page}</Layout>);
 
   return (
-    <ClerkProvider
-      publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-      appearance={{
-        baseTheme: undefined,
-        variables: { colorPrimary: '#F7931A' },
-        elements: {
-          formButtonPrimary: 
-            'bg-[#F7931A] hover:bg-[#F7931A]/90 text-black font-medium',
-          card: 'bg-black/50 backdrop-blur-sm border border-white/10',
-        }
-      }}
-    >
-      {shouldExcludeLayout ? (
-        <Component {...pageProps} />
-      ) : (
-        <Layout>
+    <>
+      <ClerkProvider
+        publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+        appearance={{
+          baseTheme: undefined,
+          variables: { colorPrimary: '#F7931A' },
+          elements: {
+            formButtonPrimary: 
+              'bg-[#F7931A] hover:bg-[#F7931A]/90 text-black font-medium',
+            card: 'bg-black/50 backdrop-blur-sm border border-white/10',
+          }
+        }}
+      >
+        {shouldExcludeLayout ? (
           <Component {...pageProps} />
-        </Layout>
-      )}
-    </ClerkProvider>
+        ) : (
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        )}
+      </ClerkProvider>
+      <AnalyticsProvider />
+    </>
   );
 }
