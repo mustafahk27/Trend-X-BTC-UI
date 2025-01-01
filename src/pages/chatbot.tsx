@@ -62,7 +62,7 @@ const modelCategories: ModelCategory[] = [
   {
     title: "Google LLMs",
     models: [
-      { id: 'gemini-pro', name: 'Gemini 1.5 Pro', description: 'Advanced Google AI model with strong reasoning' },
+      { id: 'gemini-pro', name: 'Gemini 2.0 Flash', description: 'Advanced Google AI model with strong reasoning' },
       { id: 'gemini-flash', name: 'Gemini 1.5 Flash', description: 'Fast and efficient Google AI model' },
       { id: 'gemma-2-9b', name: 'Gemma 2 9B', description: 'Efficient mid-sized language model' },
       
