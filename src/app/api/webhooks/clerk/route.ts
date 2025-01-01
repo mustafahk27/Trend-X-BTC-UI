@@ -5,6 +5,7 @@ import nodemailer from 'nodemailer';
 
 //Email automation 
 //new changes
+//minor changes
 
 // Configure nodemailer transporter
 const transporter = nodemailer.createTransport({
