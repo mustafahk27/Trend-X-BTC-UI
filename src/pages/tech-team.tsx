@@ -224,13 +224,15 @@ export default function TechTeam() {
               </p>
             </div>
             <div className="order-1 md:order-2">
-              <div className="relative h-[300px] w-full rounded-xl overflow-hidden">
+              <div className="relative w-full h-[200px] md:h-[500px] rounded-xl overflow-hidden bg-black">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#F7931A_0%,transparent_35%)] opacity-15" />
                 <Image
                   src="/Trend-X-BTC .png"
                   alt="Deep Learning Model"
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-xl"
+                  width={800}
+                  height={400}
+                  className="rounded-xl w-full h-full md:w-auto md:h-auto object-contain"
+                  priority
                 />
               </div>
             </div>
