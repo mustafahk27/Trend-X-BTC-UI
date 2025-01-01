@@ -501,12 +501,12 @@ export default function ChatbotPage() {
         }),
       });
 
+      const data = await searchResponse.json();
+
       if (!searchResponse.ok) {
-        throw new Error('Search failed');
+        throw new Error(data.message || 'Search failed');
       }
 
-      const searchData = await searchResponse.json();
-      
       // Send search results to the selected LLM
       const llmResponse = await fetch('/api/chat', {
         method: 'POST',
@@ -514,22 +514,22 @@ export default function ChatbotPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: `Based on the following search results, ${input}\n\nSearch Results:\n${JSON.stringify(searchData, null, 2)}`,
+          message: `Based on the following search results, ${input}\n\nSearch Results:\n${JSON.stringify(data.results, null, 2)}`,
           modelId: selectedModel.id
         }),
       });
 
+      const llmData = await llmResponse.json();
+
       if (!llmResponse.ok) {
-        throw new Error('LLM processing failed');
+        throw new Error(llmData.message || 'LLM processing failed');
       }
 
-      const completion = await llmResponse.json();
-      
       const aiMessage: EnhancedMessage = {
-        content: completion.choices[0]?.message?.content || 'No response generated.',
+        content: llmData.choices[0]?.message?.content || 'No response generated.',
         isUser: false,
         timestamp: new Date(),
-        citations: searchData.citations
+        citations: data.citations
       };
 
       setMessages(prev => [...prev, aiMessage]);
