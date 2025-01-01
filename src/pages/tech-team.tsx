@@ -58,9 +58,9 @@ const teamMembers = [
   },
   {
     name: 'Burhanuddin Khatri',
-    role: 'API & Three.js Specialist',
+    role: 'AI Developer and 3D UI Designer',
     image: '/team-member-3.jpg',
-    description: 'Combining API integrations with 3D model design to deliver seamless, visually immersive UI',
+    description: 'Integrated APIs and set up LLMs alongside 3D model design to deliver a seamless, visually immersive UI.',
     socials: {
         linkedin: 'https://www.linkedin.com/in/burhankhatri/',
         github: 'https://github.com/BurhanCantCode',
