@@ -153,19 +153,19 @@ export default function TechTeam() {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="fixed top-6 left-6 z-20 flex gap-4">
+      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
         <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
         <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" />
         <NavButton href="/chatbot" icon={MessageSquare} label="AI Chat" />
       </div>
 
       {/* User Button */}
-      <div className="fixed top-6 right-6 z-20">
+      <div className="fixed top-2 sm:top-6 right-2 sm:right-6 z-20">
         <UserButton 
           afterSignOutUrl="/"
           appearance={{
             elements: {
-              avatarBox: "w-10 h-10 rounded-full border-2 border-white/10 hover:border-[#F7931A]/50 transition-all",
+              avatarBox: "w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white/10 hover:border-[#F7931A]/50 transition-all",
               userButtonPopover: "bg-black/90 border border-white/10 backdrop-blur-sm",
               userButtonPopoverCard: "bg-transparent",
               userButtonPopoverActions: "bg-transparent",
@@ -178,16 +178,16 @@ export default function TechTeam() {
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 px-6 pt-12 pb-24 max-w-7xl mx-auto">
+      <main className="relative z-10 px-4 sm:px-6 pt-20 sm:pt-24 pb-16 sm:pb-24 max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.section 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          className="text-center mb-12 sm:mb-20"
         >
-          <h1 className="text-4xl md:text-6xl font-bold text-[#F7931A] mb-6">Tech & Team</h1>
-          <p className="text-xl text-gray-300">Meet the innovation and expertise behind Trend-X-BTC.</p>
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-[#F7931A] mb-4 sm:mb-6">Tech & Team</h1>
+          <p className="text-lg sm:text-xl text-gray-300">Meet the innovation and expertise behind Trend-X-BTC.</p>
         </motion.section>
 
         {/* Our Approach Section */}
@@ -255,17 +255,16 @@ export default function TechTeam() {
           className="mb-20"
         >
           <h2 className="text-3xl font-bold text-white mb-12 text-center">Tech Stack</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {techStack.map((tech, index) => (
               <motion.div
                 key={tech.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 * index }}
-                className="text-center"
               >
-                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-6 hover:border-[#F7931A]/50 transition-all">
-                  <div className="relative h-16 w-full mb-4">
+                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-4 sm:p-6 hover:border-[#F7931A]/50 transition-all h-full">
+                  <div className="relative h-12 sm:h-16 w-12 sm:w-16 mx-auto mb-3 sm:mb-4">
                     <Image
                       src={tech.logo}
                       alt={tech.name}
@@ -273,8 +272,8 @@ export default function TechTeam() {
                       objectFit="contain"
                     />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{tech.name}</h3>
-                  <p className="text-sm text-gray-300">{tech.description}</p>
+                  <h3 className="text-base sm:text-lg font-semibold text-white text-center mb-1 sm:mb-2">{tech.name}</h3>
+                  <p className="text-sm sm:text-base text-gray-300 text-center">{tech.description}</p>
                 </Card>
               </motion.div>
             ))}
@@ -360,13 +359,12 @@ export default function TechTeam() {
         </motion.section>
 
         {/* Team Section */}
-        <motion.section 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-        >
-          <h2 className="text-3xl font-bold text-white mb-12 text-center">Meet Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section className="mt-12 sm:mt-20">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 sm:mb-8 text-center">
+            Meet Our Team
+          </h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
             {teamMembers.map((member, index) => (
               <motion.div
                 key={member.name}
@@ -374,8 +372,8 @@ export default function TechTeam() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 * index }}
               >
-                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-6 hover:border-[#F7931A]/50 transition-all">
-                  <div className="relative h-48 w-48 mx-auto mb-6 rounded-full overflow-hidden">
+                <Card className="bg-black/50 backdrop-blur-sm border border-white/10 p-3 sm:p-4 lg:p-6 hover:border-[#F7931A]/50 transition-all">
+                  <div className="relative w-16 h-16 sm:w-24 sm:h-24 lg:w-32 lg:h-32 mx-auto mb-3 sm:mb-4 lg:mb-6">
                     <Image
                       src={member.image}
                       alt={member.name}
@@ -384,35 +382,34 @@ export default function TechTeam() {
                       className="rounded-full"
                     />
                   </div>
-                  <h3 className="text-xl font-semibold text-white text-center mb-2">{member.name}</h3>
-                  <p className="text-[#F7931A] text-center mb-4">{member.role}</p>
-                  <p className="text-gray-300 text-center mb-4">{member.description}</p>
+                  <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white text-center mb-1 sm:mb-2">
+                    {member.name}
+                  </h3>
+                  <p className="text-sm sm:text-base text-[#F7931A] text-center mb-2 sm:mb-3">
+                    {member.role}
+                  </p>
+                  <p className="text-xs sm:text-sm lg:text-base text-gray-300 text-center mb-3 sm:mb-4">
+                    {member.description}
+                  </p>
                   
-                  <div className="flex justify-center gap-4">
-                    {member.socials && member.socials.linkedin && (
-                      <a href={member.socials.linkedin} target="_blank" rel="noopener noreferrer" 
-                         className="text-gray-300 hover:text-[#F7931A] transition-colors">
-                        LinkedIn
+                  <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                    {member.socials && Object.entries(member.socials).map(([platform, url]) => (
+                      <a
+                        key={platform}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs sm:text-sm text-gray-300 hover:text-[#F7931A] transition-colors"
+                      >
+                        {platform.charAt(0).toUpperCase() + platform.slice(1)}
                       </a>
-                    )}
-                    {member.socials && member.socials.github && (
-                      <a href={member.socials.github} target="_blank" rel="noopener noreferrer" 
-                         className="text-gray-300 hover:text-[#F7931A] transition-colors">
-                        GitHub
-                      </a>
-                    )}
-                    {member.socials && member.socials.portfolio && (
-                      <a href={member.socials.portfolio} target="_blank" rel="noopener noreferrer" 
-                         className="text-gray-300 hover:text-[#F7931A] transition-colors">
-                        Portfolio
-                      </a>
-                    )}
+                    ))}
                   </div>
                 </Card>
               </motion.div>
             ))}
           </div>
-        </motion.section>
+        </section>
       </main>
     </div>
   );

@@ -354,3 +354,22 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+.search-input {
+  color: white !important;
+}
+
+.search-input::placeholder {
+  color: rgb(156 163 175) !important;
+}
+
+/* Override any potential shadcn-ui default styles */
+.search-input[type="text"] {
+  color: white !important;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}

@@ -723,7 +723,8 @@ export default function ChatbotPage() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
                   placeholder="Ask AI..."
-                  className={`search-input text-base sm:text-sm px-3 sm:px-4 ${input ? 'expanded' : ''}`}
+                  className={`search-input text-base sm:text-sm px-3 sm:px-4 ${input ? 'expanded' : ''} text-white !text-white placeholder:text-gray-400`}
+                  style={{ color: 'white' }}
                   onFocus={(e) => {
                     e.currentTarget.parentElement?.classList.add('expanded');
                   }}
