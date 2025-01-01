@@ -9,7 +9,7 @@ import { NavButton } from "@/components/ui/nav-button";
 import { BarChart2, MessageSquare } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 
-//burhan made last minute changes
+//burhan made last minute changes...
 // Tech stack data
 const techStack = [
   {
