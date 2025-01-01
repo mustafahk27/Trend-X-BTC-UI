@@ -11,6 +11,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+// const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 
 // Initialize Storage
