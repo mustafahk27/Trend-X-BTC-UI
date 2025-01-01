@@ -240,11 +240,11 @@ const ChatMessage = ({ message, user, isTyping }: {
       initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-3 sm:mb-2 px-2 sm:px-0`}
+      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-2 px-2 sm:px-0`}
     >
-      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[92vw] sm:max-w-[80%] last:mb-0`}>
-        <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
-          <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
+      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[85vw] sm:max-w-[80%]`}>
+        <div className={`flex items-start gap-2 sm:gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
+          <Avatar className={`w-6 h-6 sm:w-8 sm:h-8 ${message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}`}>
             {message.isUser ? (
               <>
                 <AvatarImage 
@@ -276,12 +276,12 @@ const ChatMessage = ({ message, user, isTyping }: {
           {message.isUser ? (
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-xl bg-[#F7931A] text-black"
+              className="p-2 sm:p-4 rounded-xl bg-[#F7931A] text-black text-sm sm:text-base"
             >
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </motion.div>
           ) : (
-            <div className="text-white relative">
+            <div className="text-white relative text-sm sm:text-base">
               <motion.div
                 animate={isTyping ? {
                   x: [0, 0.3, -0.3, 0],
@@ -654,29 +654,30 @@ export default function ChatbotPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-[#111111] text-gray-300 text-xs sm:text-sm p-2 sm:p-3 rounded-t-xl"
+            className="bg-[#111111] text-gray-300 text-xs sm:text-sm p-1.5 sm:p-3 rounded-t-xl"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-4">
                 <Link href="/prediction">
                   <Button 
                     variant="ghost"
                     size="sm"
-                    className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+                    className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] text-[10px] sm:text-sm px-1.5 sm:px-3 py-1 sm:py-2 h-auto sm:h-9"
                   >
                     <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                    Generate Prediction
+                    <span className="whitespace-nowrap">Generate Prediction</span>
                   </Button>
                 </Link>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center">
                 <Button
                   onClick={clearContext}
                   variant="ghost"
-                  className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20"
+                  size="sm"
+                  className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20 text-[10px] sm:text-sm px-1.5 sm:px-3 py-1 sm:py-2 h-auto sm:h-9"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear Chat
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Clear Chat</span>
                 </Button>
               </div>
             </div>
