@@ -7,7 +7,7 @@ import { OrbitControls, Sparkles, Environment, Float } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LoadingScreen from "@/components/LoadingScreen";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart2, MessageSquare } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { EnhancedBitcoinModel } from "@/components/EnhancedBitcoinModel";
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
@@ -161,8 +161,28 @@ export default function PredictionPage() {
       </div>
 
       {/* Navigation */}
-      <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
+      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
+        <NavButton 
+          href="/dashboard" 
+          icon={ArrowLeft} 
+          label="Back"
+          className="flex items-center gap-2 !px-3 sm:!px-6 !py-2 sm:!py-5"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/dashboard" 
+          icon={BarChart2} 
+          label="Dashboard"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/chatbot" 
+          icon={MessageSquare} 
+          label="AI Chat"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
       </div>
 
       {/* User Button */}

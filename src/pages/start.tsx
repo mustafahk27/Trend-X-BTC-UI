@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { ArrowLeft, Users } from "lucide-react";
+import { NavButton } from "@/components/nav-button";
 
 export default function StartPage() {
   return (
@@ -72,6 +74,24 @@ export default function StartPage() {
               </div>
             </Link>
           </motion.div>
+        </div>
+
+        {/* Navigation */}
+        <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
+          <NavButton 
+            href="/" 
+            icon={ArrowLeft} 
+            label="Back"
+            className="flex items-center gap-2 !px-3 sm:!px-6 !py-2 sm:!py-5"
+            showLabelOnMobile={true}
+          />
+          <NavButton 
+            href="/tech-team" 
+            icon={Users} 
+            label="Team"
+            className="flex items-center gap-2"
+            showLabelOnMobile={true}
+          />
         </div>
       </div>
     </div>

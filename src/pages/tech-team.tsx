@@ -154,9 +154,27 @@ export default function TechTeam() {
 
       {/* Navigation Buttons */}
       <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
-        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
-        <NavButton href="/dashboard" icon={BarChart2} label="Dashboard" />
-        <NavButton href="/chatbot" icon={MessageSquare} label="AI Chat" />
+        <NavButton 
+          href="/dashboard" 
+          icon={ArrowLeft} 
+          label="Back"
+          className="flex items-center gap-2 !px-3 sm:!px-6 !py-2 sm:!py-5"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/dashboard" 
+          icon={BarChart2} 
+          label="Dashboard"
+          className="flex items-center gap-2" 
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/chatbot" 
+          icon={MessageSquare} 
+          label="AI Chat"
+          className="flex items-center gap-2" 
+          showLabelOnMobile={true}
+        />
       </div>
 
       {/* User Button */}

@@ -5,7 +5,7 @@
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Wand2, Database, Home, MessageSquare, Users } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Activity, DollarSign, Wand2, Database, Home, MessageSquare, Users, LineChart } from "lucide-react";
 import Link from 'next/link';
 import { UserButton } from "@clerk/nextjs";
 import { NavButton } from "@/components/ui/nav-button";
@@ -254,11 +254,28 @@ export default function Dashboard() {
       </div>
 
       {/* Navigation Buttons */}
-      <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <NavButton href="/" icon={Home} label="Home" />
-        <NavButton href="/chatbot" icon={MessageSquare} label="AI Chat" />
-        <NavButton href="/prediction" icon={Wand2} label="Predict Latest" />
-        <NavButton href="/tech-team" icon={Users} label="Tech & Team" />
+      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
+        <NavButton 
+          href="/prediction" 
+          icon={LineChart} 
+          label="Predict"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/chatbot" 
+          icon={MessageSquare} 
+          label="AI Chat"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/tech-team" 
+          icon={Users} 
+          label="Team"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
       </div>
 
       {/* User Button (Logout) */}
