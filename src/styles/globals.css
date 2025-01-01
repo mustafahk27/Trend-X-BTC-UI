@@ -315,3 +315,42 @@ body {
     margin: 2px 0;
   }
 }
+
+.search-input.flex {
+  height: 48px;
+  padding: 0 20px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 15px;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .search-input.flex {
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.searching-gradient {
+  background: linear-gradient(90deg, #F7931A, #ffd700, #F7931A);
+  background-size: 200% 200%;
+  animation: gradientAnimation 2s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

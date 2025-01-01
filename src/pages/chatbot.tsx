@@ -422,6 +422,7 @@ export default function ChatbotPage() {
     return mixtralModel || modelCategories[0].models[0];
   });
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -489,6 +490,7 @@ export default function ChatbotPage() {
 
   const handleWebSearch = async () => {
     setIsSearching(true);
+    setShowTypingIndicator(false);
     try {
       const searchResponse = await fetch('/api/search', {
         method: 'POST',
@@ -534,7 +536,7 @@ export default function ChatbotPage() {
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Search failed:', error);
       const errorMessage: EnhancedMessage = {
         content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try again.`,
         isUser: false,
@@ -680,72 +682,26 @@ export default function ChatbotPage() {
           {/* Messages Area with enhanced animations */}
           <ScrollArea className="h-[calc(100%-8rem)] p-4 relative z-10">
             {messages.map((message, index) => (
-              <ChatMessage 
-                key={index} 
-                message={message} 
-                user={user}
-                isTyping={isTyping}
-              />
+              <div key={index} className="mb-4">
+                {isSearching && index === messages.length - 1 && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center space-x-2 px-4 py-2"
+                  >
+                    <span className="text-lg font-medium searching-gradient">
+                      Searching the web...
+                    </span>
+                  </motion.div>
+                )}
+                
+                <ChatMessage 
+                  message={message} 
+                  user={user}
+                  isTyping={isTyping && index === messages.length - 1 && !isSearching}
+                />
+              </div>
             ))}
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-gray-400"
-              >
-                <Avatar className="bg-white/10 w-8 h-8 overflow-hidden">
-                  <AvatarImage 
-                    src="/ai-avatar.png" 
-                    alt="AI Assistant" 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback>
-                    <Image 
-                      src="/ai-avatar.png" 
-                      alt="AI" 
-                      className="w-full h-full object-cover"
-                      width={32}
-                      height={32}
-                    />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex gap-1">
-                  <span className="animate-bounce">●</span>
-                  <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
-                  <span className="animate-bounce" style={{ animationDelay: "0.4s" }}>●</span>
-                </div>
-              </motion.div>
-            )}
-            {isSearching && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-gray-400"
-              >
-                <Avatar className="bg-white/10 w-8 h-8 overflow-hidden">
-                  <AvatarImage 
-                    src="/ai-avatar.png" 
-                    alt="AI Assistant" 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback>
-                    <Image 
-                      src="/ai-avatar.png" 
-                      alt="AI" 
-                      className="w-full h-full object-cover"
-                      width={32}
-                      height={32}
-                    />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="p-3 rounded-xl bg-white/10">
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Searching the web...
-                  </div>
-                </div>
-              </motion.div>
-            )}
             <div ref={messagesEndRef} />
           </ScrollArea>
 
