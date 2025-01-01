@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowLeft, Users } from "lucide-react";
-import { NavButton } from "@/components/nav-button";
+import { NavButton } from "@/components/ui/nav-button";
 
 export default function StartPage() {
   return (

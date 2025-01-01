@@ -102,35 +102,33 @@ export default function PredictionPage() {
   const handlePredict = async () => {
     setIsPredicting(true);
     
-    // Add initial delay before starting animations
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Reduced to 500ms
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    // Slow down the scale animation
+    // Faster scale animation
     await controls.start({
       scale: [1, 1.2, 1],
       transition: { 
-        duration: 2,
-        repeat: 3,
+        duration: 1,     // Reduced to 1 second
+        repeat: 1,       // Only one repeat
         repeatType: "reverse",
         ease: "easeInOut"
       }
     });
     
     try {
-      // Add loading delay to show the animation steps
       const steps = [
         "Fetching blockchain metrics and market data...",
         "Analyzing Fear & Greed Index and on-chain signals...",
         "Processing historical patterns with LSTM networks...",
         "Applying attention mechanism to key indicators...",
         "Generating neural network predictions..."
-      ];
+      ]; // Keeping all steps
 
       for (const step of steps) {
-        // Update UI with current step (you'll need to add state for this)
         setCurrentStep(step);
-        // Wait 2 seconds between each step
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Reduced to 400ms per step
+        await new Promise(resolve => setTimeout(resolve, 400));
       }
 
       const response = await fetch('/api/fetchPredictions');
@@ -142,7 +140,7 @@ export default function PredictionPage() {
       const { predictions } = data;
       
       // Add delay before fetching price
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
       if (!binanceResponse.ok) {
@@ -176,8 +174,8 @@ export default function PredictionPage() {
     } catch (error) {
       console.error('Error fetching predictions:', error);
     } finally {
-      // Add delay before ending the prediction state
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Reduced to 300ms
+      await new Promise(resolve => setTimeout(resolve, 300));
       setIsPredicting(false);
     }
   };
