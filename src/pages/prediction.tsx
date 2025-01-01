@@ -7,7 +7,7 @@ import { OrbitControls, Sparkles, Environment, Float } from "@react-three/drei";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import LoadingScreen from "@/components/LoadingScreen";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart2, MessageSquare } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { EnhancedBitcoinModel } from "@/components/EnhancedBitcoinModel";
 import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
@@ -35,9 +35,9 @@ function PredictionScene({ isPredicting }: { isPredicting: boolean }) {
         {isPredicting && (
           <group scale={1.2} position={[0, 0, 0]}>
             <Float 
-              speed={1} 
-              rotationIntensity={0.2} 
-              floatIntensity={0.2}
+              speed={0.5}
+              rotationIntensity={0.1}
+              floatIntensity={0.1}
             >
               <EnhancedBitcoinModel isPredicting={isPredicting} />
               
@@ -46,7 +46,7 @@ function PredictionScene({ isPredicting }: { isPredicting: boolean }) {
                 count={100}
                 scale={15}
                 size={6}
-                speed={2}
+                speed={1}
                 opacity={0.5}
                 color="#F7931A"
               />
@@ -73,7 +73,7 @@ function PredictionScene({ isPredicting }: { isPredicting: boolean }) {
           enableZoom={false}
           enablePan={false}
           autoRotate
-          autoRotateSpeed={isPredicting ? 4 : 1}
+          autoRotateSpeed={isPredicting ? 2 : 0.5}
           maxPolarAngle={Math.PI / 1.5}
           minPolarAngle={Math.PI / 2.5}
         />
@@ -92,6 +92,7 @@ export default function PredictionPage() {
     dates: { date: string; price: string }[];
   }>(null);
   const controls = useAnimation();
+  const [currentStep, setCurrentStep] = useState<string>('');
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2000);
@@ -101,12 +102,37 @@ export default function PredictionPage() {
   const handlePredict = async () => {
     setIsPredicting(true);
     
+    // Add initial delay before starting animations
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Slow down the scale animation
     await controls.start({
       scale: [1, 1.2, 1],
-      transition: { duration: 1, repeat: 2 }
+      transition: { 
+        duration: 2,
+        repeat: 3,
+        repeatType: "reverse",
+        ease: "easeInOut"
+      }
     });
     
     try {
+      // Add loading delay to show the animation steps
+      const steps = [
+        "Fetching blockchain metrics and market data...",
+        "Analyzing Fear & Greed Index and on-chain signals...",
+        "Processing historical patterns with LSTM networks...",
+        "Applying attention mechanism to key indicators...",
+        "Generating neural network predictions..."
+      ];
+
+      for (const step of steps) {
+        // Update UI with current step (you'll need to add state for this)
+        setCurrentStep(step);
+        // Wait 2 seconds between each step
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
       const response = await fetch('/api/fetchPredictions');
       if (!response.ok) {
         throw new Error('Failed to fetch predictions');
@@ -115,7 +141,9 @@ export default function PredictionPage() {
       const data = await response.json();
       const { predictions } = data;
       
-      // Fetch current price from Binance API
+      // Add delay before fetching price
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       const binanceResponse = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
       if (!binanceResponse.ok) {
         throw new Error('Failed to fetch price from Binance');
@@ -126,10 +154,12 @@ export default function PredictionPage() {
         maximumFractionDigits: 2
       })}`;
 
-      // Calculate trend based on first and last prediction
       const firstPrice = parseFloat(predictions[0].price);
       const lastPrice = parseFloat(predictions[predictions.length - 1].price);
       const trend = lastPrice > firstPrice ? 'up' : 'down';
+      
+      // Add final delay before showing results
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       setPrediction({
         price: currentPrice,
@@ -146,6 +176,8 @@ export default function PredictionPage() {
     } catch (error) {
       console.error('Error fetching predictions:', error);
     } finally {
+      // Add delay before ending the prediction state
+      await new Promise(resolve => setTimeout(resolve, 1000));
       setIsPredicting(false);
     }
   };
@@ -161,8 +193,28 @@ export default function PredictionPage() {
       </div>
 
       {/* Navigation */}
-      <div className="fixed top-6 left-6 z-20 flex gap-4">
-        <NavButton href="/dashboard" icon={ArrowLeft} label="Back" />
+      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
+        <NavButton 
+          href="/dashboard" 
+          icon={ArrowLeft} 
+          label="Back"
+          className="flex items-center gap-2 !px-3 sm:!px-6 !py-2 sm:!py-5"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/dashboard" 
+          icon={BarChart2} 
+          label="Dashboard"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
+        <NavButton 
+          href="/chatbot" 
+          icon={MessageSquare} 
+          label="AI Chat"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
+        />
       </div>
 
       {/* User Button */}

@@ -240,11 +240,11 @@ const ChatMessage = ({ message, user, isTyping }: {
       initial={{ opacity: 0, x: message.isUser ? 20 : -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-3 sm:mb-2 px-2 sm:px-0`}
+      className={`flex ${message.isUser ? "justify-end" : "justify-start"} mb-2 px-2 sm:px-0`}
     >
-      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[92vw] sm:max-w-[80%] last:mb-0`}>
-        <div className={`flex items-start gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
-          <Avatar className={message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}>
+      <div className={`flex flex-col ${message.isUser ? "items-end" : "items-start"} max-w-[85vw] sm:max-w-[80%]`}>
+        <div className={`flex items-start gap-2 sm:gap-3 ${message.isUser ? "flex-row-reverse" : ""}`}>
+          <Avatar className={`w-6 h-6 sm:w-8 sm:h-8 ${message.isUser ? "bg-[#F7931A]/20" : "bg-white/10 overflow-hidden"}`}>
             {message.isUser ? (
               <>
                 <AvatarImage 
@@ -276,12 +276,12 @@ const ChatMessage = ({ message, user, isTyping }: {
           {message.isUser ? (
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="p-4 rounded-xl bg-[#F7931A] text-black"
+              className="p-2 sm:p-4 rounded-xl bg-[#F7931A] text-black text-sm sm:text-base"
             >
               <ReactMarkdown>{message.content}</ReactMarkdown>
             </motion.div>
           ) : (
-            <div className="text-white relative">
+            <div className="text-white relative text-sm sm:text-base">
               <motion.div
                 animate={isTyping ? {
                   x: [0, 0.3, -0.3, 0],
@@ -422,6 +422,7 @@ export default function ChatbotPage() {
     return mixtralModel || modelCategories[0].models[0];
   });
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -489,6 +490,7 @@ export default function ChatbotPage() {
 
   const handleWebSearch = async () => {
     setIsSearching(true);
+    setShowTypingIndicator(false);
     try {
       const searchResponse = await fetch('/api/search', {
         method: 'POST',
@@ -501,12 +503,12 @@ export default function ChatbotPage() {
         }),
       });
 
+      const data = await searchResponse.json();
+
       if (!searchResponse.ok) {
-        throw new Error('Search failed');
+        throw new Error(data.message || 'Search failed');
       }
 
-      const searchData = await searchResponse.json();
-      
       // Send search results to the selected LLM
       const llmResponse = await fetch('/api/chat', {
         method: 'POST',
@@ -514,27 +516,27 @@ export default function ChatbotPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: `Based on the following search results, ${input}\n\nSearch Results:\n${JSON.stringify(searchData, null, 2)}`,
+          message: `Based on the following search results, ${input}\n\nSearch Results:\n${JSON.stringify(data.results, null, 2)}`,
           modelId: selectedModel.id
         }),
       });
 
+      const llmData = await llmResponse.json();
+
       if (!llmResponse.ok) {
-        throw new Error('LLM processing failed');
+        throw new Error(llmData.message || 'LLM processing failed');
       }
 
-      const completion = await llmResponse.json();
-      
       const aiMessage: EnhancedMessage = {
-        content: completion.choices[0]?.message?.content || 'No response generated.',
+        content: llmData.choices[0]?.message?.content || 'No response generated.',
         isUser: false,
         timestamp: new Date(),
-        citations: searchData.citations
+        citations: data.citations
       };
 
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Search failed:', error);
       const errorMessage: EnhancedMessage = {
         content: `Error: ${error instanceof Error ? error.message : "An unknown error occurred"}. Please try again.`,
         isUser: false,
@@ -593,24 +595,27 @@ export default function ChatbotPage() {
       </div>
 
       {/* Navigation */}
-      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex items-center gap-2 sm:gap-4">
+      <div className="fixed top-2 sm:top-6 left-2 sm:left-6 z-20 flex flex-wrap gap-2 sm:gap-4">
         <NavButton 
           href="/dashboard" 
           icon={ArrowLeft} 
-          label="Back" 
-          className="!px-3 sm:!px-6 !py-2 sm:!py-5" 
+          label="Back"
+          className="flex items-center gap-2 !px-3 sm:!px-6 !py-2 sm:!py-5"
+          showLabelOnMobile={true}
         />
         <NavButton 
           href="/dashboard" 
           icon={BarChart2} 
-          label="Dashboard" 
-          className="hidden sm:flex" 
+          label="Dashboard"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
         />
         <NavButton 
           href="/tech-team" 
           icon={Users} 
-          label="Tech & Team" 
-          className="hidden sm:flex" 
+          label="Team"
+          className="flex items-center gap-2"
+          showLabelOnMobile={true}
         />
       </div>
 
@@ -649,29 +654,30 @@ export default function ChatbotPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="bg-[#111111] text-gray-300 text-xs sm:text-sm p-2 sm:p-3 rounded-t-xl"
+            className="bg-[#111111] text-gray-300 text-xs sm:text-sm p-1.5 sm:p-3 rounded-t-xl"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-4">
                 <Link href="/prediction">
                   <Button 
                     variant="ghost"
                     size="sm"
-                    className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+                    className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] text-[10px] sm:text-sm px-1.5 sm:px-3 py-1 sm:py-2 h-auto sm:h-9"
                   >
                     <Wand2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                    Generate Prediction
+                    <span className="whitespace-nowrap">Generate Prediction</span>
                   </Button>
                 </Link>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center">
                 <Button
                   onClick={clearContext}
                   variant="ghost"
-                  className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20"
+                  size="sm"
+                  className="bg-[#F7931A]/10 hover:bg-[#F7931A]/20 text-[#F7931A] border border-[#F7931A]/20 text-[10px] sm:text-sm px-1.5 sm:px-3 py-1 sm:py-2 h-auto sm:h-9"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Clear Chat
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Clear Chat</span>
                 </Button>
               </div>
             </div>
@@ -680,72 +686,26 @@ export default function ChatbotPage() {
           {/* Messages Area with enhanced animations */}
           <ScrollArea className="h-[calc(100%-8rem)] p-4 relative z-10">
             {messages.map((message, index) => (
-              <ChatMessage 
-                key={index} 
-                message={message} 
-                user={user}
-                isTyping={isTyping}
-              />
+              <div key={index} className="mb-4">
+                {isSearching && index === messages.length - 1 && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center space-x-2 px-4 py-2"
+                  >
+                    <span className="text-lg font-medium searching-gradient">
+                      Searching the web...
+                    </span>
+                  </motion.div>
+                )}
+                
+                <ChatMessage 
+                  message={message} 
+                  user={user}
+                  isTyping={isTyping && index === messages.length - 1 && !isSearching}
+                />
+              </div>
             ))}
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-gray-400"
-              >
-                <Avatar className="bg-white/10 w-8 h-8 overflow-hidden">
-                  <AvatarImage 
-                    src="/ai-avatar.png" 
-                    alt="AI Assistant" 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback>
-                    <Image 
-                      src="/ai-avatar.png" 
-                      alt="AI" 
-                      className="w-full h-full object-cover"
-                      width={32}
-                      height={32}
-                    />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex gap-1">
-                  <span className="animate-bounce">●</span>
-                  <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>●</span>
-                  <span className="animate-bounce" style={{ animationDelay: "0.4s" }}>●</span>
-                </div>
-              </motion.div>
-            )}
-            {isSearching && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center gap-2 text-gray-400"
-              >
-                <Avatar className="bg-white/10 w-8 h-8 overflow-hidden">
-                  <AvatarImage 
-                    src="/ai-avatar.png" 
-                    alt="AI Assistant" 
-                    className="object-cover w-full h-full"
-                  />
-                  <AvatarFallback>
-                    <Image 
-                      src="/ai-avatar.png" 
-                      alt="AI" 
-                      className="w-full h-full object-cover"
-                      width={32}
-                      height={32}
-                    />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="p-3 rounded-xl bg-white/10">
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Searching the web...
-                  </div>
-                </div>
-              </motion.div>
-            )}
             <div ref={messagesEndRef} />
           </ScrollArea>
 
@@ -767,7 +727,8 @@ export default function ChatbotPage() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
                   placeholder="Ask AI..."
-                  className={`search-input text-base sm:text-sm px-3 sm:px-4 ${input ? 'expanded' : ''}`}
+                  className={`search-input text-base sm:text-sm px-3 sm:px-4 ${input ? 'expanded' : ''} text-white !text-white placeholder:text-gray-400`}
+                  style={{ color: 'white' }}
                   onFocus={(e) => {
                     e.currentTarget.parentElement?.classList.add('expanded');
                   }}
