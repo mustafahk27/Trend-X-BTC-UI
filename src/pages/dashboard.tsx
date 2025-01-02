@@ -156,36 +156,35 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true); // Start loading
+        setLoading(true);
+        const metricsResponse = await fetchMetrics();
         
-        // Fetch all data in parallel
-        const [metricsResponse, predictionsResponse, priceData] = await Promise.all([
-          fetchMetrics(),
-          fetchPredictions(),
-          fetchCurrentPrice()
-        ]);
-
-        // Update states as soon as data is available
         if (metricsResponse?.metrics) {
+          console.log('Received metrics:', metricsResponse.metrics);
           setMetrics(metricsResponse.metrics);
+        } else {
+          console.error('No metrics data in response');
         }
 
+        const predictionsResponse = await fetchPredictions();
         if (predictionsResponse?.graphData) {
           setPredictions(predictionsResponse.graphData);
         }
 
+        await fetchCurrentPrice();
       } catch (error) {
         console.error('Error fetching data:', error);
         setError('Failed to load data');
       } finally {
-        setLoading(false); // End loading regardless of outcome
+        setLoading(false);
       }
     };
 
     fetchData();
-    const priceInterval = setInterval(fetchCurrentPrice, 30000);
-    return () => clearInterval(priceInterval);
-  }, [fetchCurrentPrice]);
+    // Set up periodic refresh
+    const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [fetchMetrics, fetchCurrentPrice]);
 
   // Generate stats array from metrics
   const stats = [
@@ -202,7 +201,9 @@ export default function Dashboard() {
     },
     {
       title: "24h Volume",
-      value: metrics ? `${metrics.Volume.toLocaleString()} BTC` : 'Loading...',
+      value: metrics?.Volume 
+        ? `${metrics.Volume.toLocaleString()} BTC` 
+        : 'Loading...',
       change: "",
       isPositive: true,
       icon: Activity,

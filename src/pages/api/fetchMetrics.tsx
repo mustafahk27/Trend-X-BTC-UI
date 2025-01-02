@@ -65,7 +65,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Update only the volume with Binance data
     latestData.Volume = parseFloat(binanceData.volume);
 
-    res.status(200).json({
+    // Add isStale flag and ensure all required fields
+    const response = {
       metrics: latestData,
       historical: historicalData.map((entry) => ({
         time: new Date(entry.Date).toLocaleTimeString(),
@@ -73,7 +74,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         timestamp: new Date(entry.Date).getTime(),
       })),
       lastUpdated: new Date().toISOString(),
+      isStale: false  // Add this flag
+    };
+
+    console.log('Sending metrics response:', {
+      hasMetrics: !!response.metrics,
+      volumeValue: response.metrics.Volume,
+      dataPoints: response.historical.length
     });
+
+    res.status(200).json(response);
 
   } catch (error) {
     console.error('Detailed error in fetch metrics:', {
