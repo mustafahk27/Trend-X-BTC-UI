@@ -202,7 +202,7 @@ export default function Dashboard() {
     },
     {
       title: "24h Volume",
-      value: metrics ? `$${metrics.Volume.toLocaleString()}` : 'Loading...',
+      value: metrics ? `${metrics.Volume.toLocaleString()} BTC` : 'Loading...',
       change: "",
       isPositive: true,
       icon: Activity,

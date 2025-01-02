@@ -17,24 +17,32 @@ interface BTCMetrics {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const filePath = 'data/cleaned_data.csv';
-    const metricsRef = ref(storage, filePath);
+    // Fetch both CSV data and Binance volume in parallel
+    const [binanceData, csvData] = await Promise.all([
+      fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT').then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Binance API error: ${response.status}`);
+        }
+        return response.json();
+      }),
+      (async () => {
+        const filePath = 'data/cleaned_data.csv';
+        const metricsRef = ref(storage, filePath);
+        console.log('Fetching from Firebase:', filePath);
+        
+        const downloadURL = await getDownloadURL(metricsRef);
+        console.log('Got download URL:', downloadURL);
+        
+        const response = await fetch(downloadURL);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file. HTTP status: ${response.status}`);
+        }
+        return response.text();
+      })()
+    ]);
 
-    console.log('Attempting to fetch metrics:', {
-      filePath,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    });
-
-    const downloadURL = await getDownloadURL(metricsRef);
-    console.log('Successfully got download URL');
-
-    const response = await fetch(downloadURL);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file. HTTP status: ${response.status}`);
-    }
-
-    const csvText = await response.text();
-    const parsed = Papa.parse<BTCMetrics>(csvText, {
+    // Parse CSV data
+    const parsed = Papa.parse<BTCMetrics>(csvData, {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -49,6 +57,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const latestData = data[data.length - 1];
     const historicalData = data.slice(-48);
 
+    // Update only the volume with Binance data
+    latestData.Volume = parseFloat(binanceData.volume);
+
     res.status(200).json({
       metrics: latestData,
       historical: historicalData.map((entry) => ({
@@ -56,8 +67,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         price: entry.Open,
         timestamp: new Date(entry.Date).getTime(),
       })),
-      lastUpdated: latestData.Date,
+      lastUpdated: new Date().toISOString(),
     });
+
   } catch (error) {
     console.error('Detailed error in fetch metrics:', {
       error,
