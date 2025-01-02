@@ -15,6 +15,11 @@ interface BTCMetrics {
   num_user_addresses: number;
 }
 
+interface BinanceResponse {
+  volume: string;
+  // We only need volume, but typescript needs to know the shape
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // Fetch both CSV data and Binance volume in parallel
