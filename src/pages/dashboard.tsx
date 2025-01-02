@@ -201,8 +201,8 @@ export default function Dashboard() {
       icon: DollarSign,
     },
     {
-      title: "24h Volume",
-      value: metrics ? `$${metrics.Volume.toLocaleString()}` : 'Loading...',
+      title: "BTC Last Day Volume",
+      value: metrics ? `${metrics.Volume.toLocaleString()} ₿` : 'Loading...',
       change: "",
       isPositive: true,
       icon: Activity,
