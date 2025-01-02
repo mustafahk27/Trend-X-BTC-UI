@@ -15,26 +15,36 @@ interface BTCMetrics {
   num_user_addresses: number;
 }
 
+interface BinanceResponse {
+  volume: string;
+  // We only need volume, but typescript needs to know the shape
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    const filePath = 'data/cleaned_data.csv';
-    const metricsRef = ref(storage, filePath);
+    // Fetch both CSV data and Binance volume in parallel
+    const [binanceResponse, csvData] = await Promise.all([
+      fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'),
+      (async () => {
+        const filePath = 'data/cleaned_data.csv';
+        const metricsRef = ref(storage, filePath);
+        const downloadURL = await getDownloadURL(metricsRef);
+        const response = await fetch(downloadURL);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file. HTTP status: ${response.status}`);
+        }
+        return response.text();
+      })()
+    ]);
 
-    console.log('Attempting to fetch metrics:', {
-      filePath,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    });
-
-    const downloadURL = await getDownloadURL(metricsRef);
-    console.log('Successfully got download URL');
-
-    const response = await fetch(downloadURL);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch file. HTTP status: ${response.status}`);
+    if (!binanceResponse.ok) {
+      throw new Error('Failed to fetch Binance data');
     }
 
-    const csvText = await response.text();
-    const parsed = Papa.parse<BTCMetrics>(csvText, {
+    const binanceData = await binanceResponse.json();
+    
+    // Parse CSV data
+    const parsed = Papa.parse<BTCMetrics>(csvData, {
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -48,6 +58,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = parsed.data;
     const latestData = data[data.length - 1];
     const historicalData = data.slice(-48);
+
+    // Update the volume with real-time data from Binance
+    latestData.Volume = parseFloat(binanceData.volume);
 
     res.status(200).json({
       metrics: latestData,

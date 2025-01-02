@@ -202,7 +202,7 @@ export default function Dashboard() {
     },
     {
       title: "24h Volume",
-      value: metrics ? `$${metrics.Volume.toLocaleString()}` : 'Loading...',
+      value: metrics ? `${metrics.Volume.toLocaleString()} BTC` : 'Loading...',
       change: "",
       isPositive: true,
       icon: Activity,
@@ -338,7 +338,7 @@ export default function Dashboard() {
           {/* Main Chart */}
           <div className="lg:col-span-2">
             <div className="bg-black/50 backdrop-blur-sm border border-white/10 p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Bitcoin Price Prediction - Next 30 Days</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Bitcoin Closing Price Prediction - 30 Days</h3>
               <div className="w-full" style={{ height: 300 }}>
                 {loading ? (
                   <div className="flex items-center justify-center h-full text-gray-400">
